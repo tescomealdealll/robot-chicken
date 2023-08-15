@@ -10,4 +10,6 @@
 
 - Change env.js.example to your liking and rename it to env.js
 
-- Run the compiled file with `node transpiled-chicken-bot.js`
+- Run the compiled file with `node transpiled-chicken-bot.js` 😎
+
+![zerobee](https://static.wikia.nocookie.net/0b0t/images/5/50/Wiki-background/revision/latest?cb=20200716085243])
