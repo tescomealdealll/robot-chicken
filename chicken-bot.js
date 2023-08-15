@@ -1185,7 +1185,7 @@ class DupeCommand extends Command {
         DupeCommand.dupingFor = this.username 
         tpaTo(this.username)
         await waitForPlayer(this.username)
-        if(this.username != '_Nether_Chicken' && DupeCommand.dupingFor) {
+        if(DupeCommand.dupingFor) {
             if(!database.dupeCount.hasOwnProperty(this.username) || database.dupeCount[this.username] < 5)
                 speak(`${this.username}, drop me up to 18 shulkers, and I will double them. Make sure to place an enderchest nearby. Hit me when you're done handing the shulks.`)
         }
