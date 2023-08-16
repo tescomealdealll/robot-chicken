@@ -1164,12 +1164,8 @@ class DupeCommand extends Command {
             speak('&dupe is out of order. Try again later')
             return
         }
-        if(Object.values(bot.entities).filter(entity=>entity.type=='player').length > 1) {
-            speak(`I can't dupe right now, there's someone nearby`)
-            return
-        }
         if(DupeCommand.cooldown.hasOwnProperty(this.username)) {
-            let duration = moment.duration(moment().diff(AskGPTCommand.cooldown[this.username])).asSeconds()
+            let duration = moment.duration(moment().diff(DupeCommand.cooldown[this.username])).asSeconds()
             if(duration < 40 && duration > 0) {
                 log(`&dupe is on cooldown for ${this.username}`)
                 speak(`< &dupe is on cooldown for ${this.username}. Try again in ${duration}s`)
@@ -1178,6 +1174,10 @@ class DupeCommand extends Command {
         }
         if(lock) {
             lock.checkLocked(this.username)
+            return
+        }
+        if(Object.values(bot.entities).filter(entity=>entity.type=='player').length > 1) {
+            speak(`I can't dupe right now, there's someone nearby`)
             return
         }
         lock = this
@@ -1279,12 +1279,11 @@ class KitCommand extends Command {
             new AttackCommand(this.username).execute()
             return
         }
-        let kitMatches1 = Object.keys(KITS_1)
+        const levenshteinDiffSortedMatches = (object) => Object.keys(object)
             .filter(key => levenshtein.get(this.kitId, key.toLowerCase()) < 3)
             .sort((a, b) => levenshtein.get(this.kitId, a.toLowerCase()) - levenshtein.get(this.kitId, b.toLowerCase()))
-        let kitMatches2 = Object.keys(KITS_2)
-            .filter(key => levenshtein.get(this.kitId, key.toLowerCase()) < 3)
-            .sort((a, b) => levenshtein.get(this.kitId, a.toLowerCase()) - levenshtein.get(this.kitId, b.toLowerCase()))
+        let kitMatches1 = levenshteinDiffSortedMatches(KITS_1)
+        let kitMatches2 = levenshteinDiffSortedMatches(KITS_2)
         let kitMatches = kitMatches1.length > 0 || kitMatches2.length > 0
         if(!kitMatches) {
             speak('< Unknown kit. Check the IDs under the images here: `https://robot-chicken.tiiny.site')
