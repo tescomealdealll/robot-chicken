@@ -71,14 +71,25 @@ function registerFunctions() {
         if(!matchesTpRequest)
             return
         const user = matchesTpRequest[1]
-        if(bot.entity.position.distanceTo(new Vec3(0,0,0)) > 5000 || user == 'Kepterv')
-            bot.chat('/tpn ' + user)
-        else
+        if(['_Nether_Chicken', 'fakecoolmann'].includes(user)) {
             bot.chat('/tpy ' + user)
+        } else {
+            bot.chat('/tpn ' + user)
+        }
+        // if(bot.entity.position.distanceTo(new Vec3(0,0,0)) > 5000 || user == 'Kepterv')
+        //     bot.chat('/tpn ' + user)
+        // else
+        //     bot.chat('/tpy ' + user)
     })
     bot.on("spawn", () => {
         bot.afk.setOptions({ fishing: false })
         bot.afk.start()
+    })
+    bot.on('whisper', (username, message, translate, jsonMsg, matches) => {
+        if(username != '_Nether_Chicken')
+            return
+        if(message == 'come')
+            bot.chat('/tpa _Nether_Chicken')
     })
     bot.on('kicked', async (reason) => {
         log(`Kicked for reason: ${reason}`)

@@ -53,7 +53,7 @@ const PROMOTION_MESSAGES = [
 const COMMAND_PREFIXES = ['!', '&', '$', '?', '*', '%', '>', ':']
 const WEBHOOK = new WebhookClient({ url: `http://discord.com/api/webhooks/1131047779817500793/${process.env.WEBHOOK_ID}` }) // thanks Cody4687
 
-const VIP = ['antonymph', 'antonymphs', 'AstolfoIsKing', 'prljav', '_Nether_Chicken'] // cooldown removed, more kits!
+const VIP = ['antonymph', 'antonymphs', 'AstolfoIsKing', 'prljav', '_Nether_Chicken', 'PayTheParrot'] // cooldown removed, more kits!
 const VVIP = ['antonymph', 'antonymphs', '_Nether_Chicken'] // reset priviledges!!
 const VVVIP = ['_Nether_Chicken'] // tp and whisper command priviledge!!!
 
@@ -344,7 +344,7 @@ function initDiscord() {
 }
 
 async function updatePlayerTabImg() {
-    if(!bot || !bot.players)
+    if(!bot || !bot.players || !playerChannel)
         return
     let playerList = Object.keys(bot.players)
         .map(player => ({ name: player, ping: bot.players[player].ping }))
@@ -1337,7 +1337,7 @@ class KitCommand extends Command {
         KitCommand.kitId = this.kitId
         let chest = null
         let kitPosGround = this.getKitPosGround()
-        if(kitPosGround.distanceTo(bot.entity) > 300) {
+        if(kitPosGround.distanceTo(bot.entity.position) > 300) {
             speak(`I'm too far away from the stash. This shouldn't happen. Automatically rage quitting`)
             process.exit(1)
         }
@@ -1496,6 +1496,12 @@ class AttackCommand extends Command {
         if(doKill)
             kill()
         lock = null
+        if(this.username == '_Nether_Chicken') {
+            log('boop!!!!')
+            return
+        }
+        speak(`< Bonk! No grief kits here. ${this.username} is getting a 24-hour timeout.`)
+        KitCommand.cooldown[this.username] = moment().add(24, 'hours')
     }
 
     async getSword() {
@@ -1508,7 +1514,7 @@ class AttackCommand extends Command {
             log(chest)
             log(error)
         }
-        let swordSlots = chest.slots.filter(item => item?.name.includes('sword')).map(item=>item.slot)
+        let swordSlots = chest.slots.filter(item => item?.type == 276).map(item=>item.slot)
         if(swordSlots.length == 0) {
             critical = false
             chest.close()
@@ -1519,6 +1525,7 @@ class AttackCommand extends Command {
         await bot.simpleClick.leftMouse(27).catch(()=>{})
         critical = false
         chest.close()
+        await moveItemToHand(276)
         return true
     }
 
@@ -1628,6 +1635,12 @@ function getEmptySlotsInventory() {
 }
 
 function getEmptySlots(chest) {
+    if(chest?.slots == null) {
+        speak('chest.slots is null what the fuck how the fuck why the fuck')
+        speak(`I'm stealing your stuff`)
+        lock.reset(true)
+        return
+    }
     return chest.slots.reduce((acc, val, index) => val === null ? [...acc, index] : acc, []).filter((slot) => slot < 27)
 }
 
@@ -1704,6 +1717,39 @@ function tpaTo(username) {
     }
 }
 
+async function moveItemToHand(itemId) {
+    let itemSlot = bot.inventory.items().filter(item => item?.type == itemId).map(item => item.slot)
+    if(itemSlot == -1)
+        return
+    await bot.moveSlotItem(itemSlot, 36)
+    bot.setQuickBarSlot(0)
+}
+
+function hasEnderchest() {
+    let enderchestSlots = bot.inventory.items().filter(item => item?.type == 130).map(item => item.slot)
+    return enderchestSlots.length > 0
+}
+
+function getReferenceBlock() {
+    let validPositions = []
+    for(let x = -3; x < 3; x++) {
+        for(let y = 0; y < 3; y++) {
+            for(let z = -3; z < 3; z++) {
+                let targetPos = bot.entity.position.offset(x,y,z)
+                let isAir = bot.blockAt(targetPos).type == 0
+                let blockUnder = bot.blockAt(targetPos.offset(0,-1,0))
+                if(isAir && blockUnder.type != 0) {
+                    validPositions.push(blockUnder)
+                }
+            }
+        }
+    }
+    if(validPositions.length == 0)
+        return null
+    validPositions.sort((block) => bot.entity.position.distanceTo(block.position))
+    return validPositions[0]
+}
+
 async function forEnderchest(username) {
     if(!lock)
         return
@@ -1730,6 +1776,14 @@ async function forEnderchest(username) {
     }
     ticksStart = ticks
     while(!bot.findBlock({ matching: [130], maxDistance: 5 })) {
+        if(hasEnderchest()) {
+            await moveItemToHand(130)
+            let referenceBlock = getReferenceBlock()
+            let faceVector = new Vec3(0, 1, 0)
+            await bot.placeBlock(referenceBlock, faceVector)
+            await bot.waitForTicks(3)
+            continue
+        }
         if(!lock)
             return
         if(ticks - ticksStart > 600) {
@@ -1737,7 +1791,7 @@ async function forEnderchest(username) {
             lock.reset(true)
             return
         }
-        await bot.waitForTicks(20)
+        await bot.waitForTicks(10)
     }
     log('Found enderchest')
 }
@@ -1957,8 +2011,10 @@ async function anonimize(message) {
             .replaceAll(/nigger/ig, 'digger')
             .replaceAll(/(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g, '0b0t.org')
             .replaceAll(/<@&?[0-9]+>/g, '[REDACTED]')
+    let verbs = ['murmured', 'muttered', 'hushed', 'sighed', 'mumbled', 'sibilated', 'uttered quietly', 'susurrated']
+    let randomVerb = verbs[Math.floor(Math.random() * verbs.length)]
     if(block)
-        speak(`Someone sent me: ${block}`)
+        speak(`Someone ${randomVerb}: ${block}`)
 }
 
 async function dropAll() {
@@ -2259,6 +2315,9 @@ function registerBotListeners() {
             lock.reset(true)
         if(message == 'source')
             new SourceCommand().execute()
+
+        if(message == 'test')
+            moveItemToHand(130)
     })
     bot.on('death', () => {
         if(lock && !intentionalDeath) {
