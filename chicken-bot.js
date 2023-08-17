@@ -89,6 +89,7 @@ const KITS_1 = {
 
     'elytra'          : BED_POS.offset(-4, 0,  -5), // https://i.imgur.com/VMBNlqh.png
     'travel'          : BED_POS.offset(-4, 0,  -5), // https://i.imgur.com/VMBNlqh.png
+    'fireworks'       : BED_POS.offset(-4, 0,  -5), // https://i.imgur.com/VMBNlqh.png
 
     'dupe'            : BED_POS.offset(-4, 0,  -6), // https://i.imgur.com/dhe5sjH.png
     'maps'            : BED_POS.offset(-4, 0,  -7), // https://i.imgur.com/xQRql7N.png
@@ -305,9 +306,11 @@ function initDiscord() {
         }
         if(content.startsWith('&ban') && author == '_nether_chicken#0') {
             ban(content.substring(4).trim())
+            return
         }
         if(content.startsWith('&unban') && author == '_nether_chicken#0') {
             unban(content.substring(6).trim())
+            return
         }
         if(content == '&verify') {
             VerifyCommand.generateCode()
