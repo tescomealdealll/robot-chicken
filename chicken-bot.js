@@ -1279,7 +1279,7 @@ class KitCommand extends Command {
         if(this.kitId == 'grief' || this.kitId == 'griefing') {
             lock = null
             this.kitId = null
-            new AttackCommand(this.username).execute()
+            new AttackCommand(this.username, this.username+',true').execute()
             return
         }
         const levenshteinDiffSortedMatches = (object) => Object.keys(object)
@@ -1481,8 +1481,9 @@ class GodPotCommand extends Command { // WIP
 }
 
 class AttackCommand extends Command {
-    constructor(username) {
+    constructor(username, args) {
         super(username)
+        this.args = args
     }
 
     checkLocked(username) {
@@ -1503,8 +1504,10 @@ class AttackCommand extends Command {
             log('boop!!!!')
             return
         }
-        speak(`< Bonk! No grief kits here. ${this.username} is getting a 24-hour timeout.`)
-        KitCommand.cooldown[this.username] = moment().add(24, 'hours')
+        if(this.becauseOfGrief) {
+            speak(`< Bonk! No grief kits here. ${this.username} is getting a 24-hour timeout.`)
+            KitCommand.cooldown[this.username] = moment().add(24, 'hours')
+        }
     }
 
     async getSword() {
@@ -1540,8 +1543,6 @@ class AttackCommand extends Command {
         lock = this
         let hasSword = await this.getSword()
         if(!hasSword) {
-            speak(`< Bonk! No grief kits here. ${this.username} is getting a 24-hour timeout.`)
-            KitCommand.cooldown[this.username] = moment().add(24, 'hours')
             this.reset()
             return
         }
@@ -1566,8 +1567,6 @@ class AttackCommand extends Command {
             try {
                 await bot.pathfinder.goto(new GoalNear(p.x, p.y, p.z, 1))
             } catch(error) {
-                speak(`< Bonk! No grief kits here. ${this.username} is getting a 24-hour timeout.`)
-                KitCommand.cooldown[this.username] = moment().add(24, 'hours')
                 this.reset(true)
                 return
             }
@@ -2012,6 +2011,7 @@ async function anonimize(message) {
             .replaceAll(/sex/ig, 'love')
             .replaceAll(/rape/ig, 'help')
             .replaceAll(/nigger/ig, 'digger')
+            .replaceAll(/nigga/ig, 'digga')
             .replaceAll(/(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g, '0b0t.org')
             .replaceAll(/<@&?[0-9]+>/g, '[REDACTED]')
     let verbs = ['murmured', 'muttered', 'hushed', 'sighed', 'mumbled', 'sibilated', 'uttered quietly', 'susurrated']
@@ -2280,7 +2280,7 @@ function registerBotListeners() {
         if(message == 'afk')
             AfkCommand.afkPlayers['_Nether_Chicken'] = [moment(), null]
         if(message.match(/attack.*/)) {
-            new AttackCommand(message.substring(6).trim()).execute()
+            new AttackCommand(null, message.substring(6).trim()).execute()
         }
         if(message.match(/kit.*/)) {
             let kitId = message.substring(4).trim()
