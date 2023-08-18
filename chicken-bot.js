@@ -328,6 +328,8 @@ function initDiscord() {
         }
         if(database.verification.hasOwnProperty(author))
             author = database.verification[author]
+        if(author == 'XDARKED')
+            author = 'xdarked'
         if (message.channel.id !== bridgeChannel.id) return
         let removedNewlines = content.replaceAll(/\n|\r/g, '').trim()
         let authorTag = `[${author}]`
