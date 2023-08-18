@@ -53,7 +53,7 @@ const PROMOTION_MESSAGES = [
 const COMMAND_PREFIXES = ['!', '&', '$', '?', '*', '%', '>', ':']
 const WEBHOOK = new WebhookClient({ url: `http://discord.com/api/webhooks/1131047779817500793/${process.env.WEBHOOK_ID}` }) // thanks Cody4687
 
-const VIP = ['antonymph', 'antonymphs', 'AstolfoIsKing', 'prljav', '_Nether_Chicken', 'PayTheParrot'] // cooldown removed, more kits!
+const VIP = ['antonymph', 'antonymphs', 'AstolfoIsKing', 'prljav', '_Nether_Chicken', 'PayTheParrot', 'lilkitkat1'] // cooldown removed, more kits!
 const VVIP = ['antonymph', 'antonymphs', '_Nether_Chicken'] // reset priviledges!!
 const VVVIP = ['_Nether_Chicken'] // tp and whisper command priviledge!!!
 
@@ -1281,7 +1281,7 @@ class KitCommand extends Command {
         if(this.kitId == 'grief' || this.kitId == 'griefing') {
             lock = null
             this.kitId = null
-            new AttackCommand(this.username, this.username+',true').execute()
+            new AttackCommand(this.username, this.username+',').execute()
             return
         }
         const levenshteinDiffSortedMatches = (object) => Object.keys(object)
@@ -1482,10 +1482,12 @@ class GodPotCommand extends Command { // WIP
     }
 }
 
+@registeredCommand("&attack", "<username>", "Bonks a fellow gamer")
 class AttackCommand extends Command {
-    constructor(username, args) {
+    constructor(username, targetUser) {
         super(username)
-        this.args = args
+        this.increaseCooldown = targetUser.includes(',')
+        this.targetUser = this.increaseCooldown ? targetUser.replace(',', '') : targetUser
     }
 
     checkLocked(username) {
@@ -1506,7 +1508,7 @@ class AttackCommand extends Command {
             log('boop!!!!')
             return
         }
-        if(this.becauseOfGrief) {
+        if(this.increaseCooldown) {
             speak(`< Bonk! No grief kits here. ${this.username} is getting a 24-hour timeout.`)
             KitCommand.cooldown[this.username] = moment().add(24, 'hours')
         }
@@ -1548,8 +1550,8 @@ class AttackCommand extends Command {
             this.reset()
             return
         }
-        tpaTo(this.username)
-        await waitForPlayer(this.username)
+        tpaTo(this.targetUser)
+        await waitForPlayer(this.targetUser)
         const defaultMove = new Movements(bot)
         defaultMove.canDig = false
         defaultMove.maxDropDown = 100
@@ -1557,7 +1559,7 @@ class AttackCommand extends Command {
         defaultMove.allowSprinting = true
         bot.pathfinder.setMovements(defaultMove)
         while(lock) {
-            const target = bot.players[this.username] ? bot.players[this.username].entity : null
+            const target = bot.players[this.targetUser] ? bot.players[this.targetUser].entity : null
             if(!target) {
                 log('No target found, resetting')
                 this.reset(true)
