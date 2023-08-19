@@ -2063,7 +2063,8 @@ function registerBotListeners() {
         let defaultKickMessages = [
             'ReadTimeoutException',
             'Not authenticated with',
-            'Error occurred while contacting login servers, are they down?'
+            'Error occurred while contacting login servers, are they down?',
+            'Proxy lost connection to server'
         ]
         if(reason.includes('You are already connected to this proxy!')) {
             if(bot)
@@ -2343,8 +2344,6 @@ function registerBotListeners() {
         if(message == 'source')
             new SourceCommand().execute()
 
-        if(message == 'test')
-            moveItemToHand(130)
     })
     bot.on('death', () => {
         if(lock && !intentionalDeath) {
