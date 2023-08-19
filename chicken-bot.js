@@ -60,6 +60,8 @@ const VVVIP = ['_Nether_Chicken'] // tp and whisper command priviledge!!!
 const EXCLUSIVE_KITS = ['lava', 'obsidian', 'tnt', 'grief', 'illegal']
 const KITS_2 = {
     'kit'             : BED_POS.offset( 4, 0, -17), // https://i.imgur.com/X7IwX5i.png
+    'sand'            : BED_POS.offset( 4, 0, -16), // https://i.imgur.com/z0HkbVD.png
+    'lava'            : BED_POS.offset( 4, 0, -15), // https://i.imgur.com/l0X8gJl.png
 }
 const KITS_1 = {
     'tree'            : BED_POS.offset(-4, 0,  19), // https://i.imgur.com/nRUlj2e.png
@@ -209,6 +211,7 @@ let lock = null
 let critical = false
 let recentlyDisconnected = false
 let blacklist = []
+let tpingTo = null
 /* END OF GLOBAL VARS */
 
 /* START OF DISCORD FUNCTIONS */
@@ -1284,6 +1287,8 @@ class KitCommand extends Command {
             new AttackCommand(this.username, this.username+',').execute()
             return
         }
+        if(this.kitId.includes(' '))
+            this.kitId = this.kitId.split(' ')[0]
         const levenshteinDiffSortedMatches = (object) => Object.keys(object)
             .filter(key => levenshtein.get(this.kitId, key.toLowerCase()) < 3)
             .sort((a, b) => levenshtein.get(this.kitId, a.toLowerCase()) - levenshtein.get(this.kitId, b.toLowerCase()))
@@ -1708,6 +1713,7 @@ function kill() {
 
 function tpaTo(username) {
     log('tping to ' + username)
+    tpingTo = username
     try {
         bot.chat('/tpa ' + username)
     } catch(error) {
@@ -2178,6 +2184,20 @@ function registerBotListeners() {
         const matchesTpRequestDenied = message.match(/^Your request sent to (.*) was denied!$/)
         const walkABlock = message.match(/^Walk a block to speak in chat.$/)
         const serverCrashed = message.match(/^Exception Connecting:ReadTimeoutException : null$/)
+        const serverCommandFailed = message.match(/^Please wait a bit before using this command again!$/)
+        const tpaAccepted = message.match(/^Your request was accepted, teleporting to: .*$/)
+        if(tpaAccepted) {
+            if(tpingTo)
+                tpingTo = null
+            else
+                log('what')
+        }
+        if(serverCommandFailed) {
+            if(tpingTo) {
+                await bot.waitForTicks(60)
+                tpaTo(tpingTo)
+            }
+        }
         if(serverRestarting) {
             log('Server restart detected. Relogging soon')
             relogGracefully()
@@ -2278,7 +2298,7 @@ function registerBotListeners() {
         if(message == 'godsword')
             new GwCommand('_Nether_Chicken').execute()
         if(message == 'come')
-            bot.chat('/tpa _Nether_Chicken')
+            tpaTo('/tpa _Nether_Chicken')
         if(message == 'drop')
             dropAll()
         if(message == 'afk')
