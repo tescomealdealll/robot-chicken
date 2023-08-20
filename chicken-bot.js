@@ -1098,7 +1098,7 @@ class ResetCommand extends Command {
     }
 }
 
-@registeredCommand("&source", "", "returns the link to my current source code")
+@registeredCommand("&source", "", "returns the link to my currently running source code")
 class SourceCommand extends Command {
     static currentSource = null
 
@@ -1509,7 +1509,7 @@ class MailCommand extends Command {
     }
 }
 
-// @registeredCommand("&godpot", "", "Baptizes the fuck out of you")
+// @registeredCommand("&godpot", "", "baptizes the fuck out of you")
 class GodPotCommand extends Command { // WIP
     constructor(username) {
         super(username)
@@ -1526,7 +1526,7 @@ class GodPotCommand extends Command { // WIP
     }
 }
 
-@registeredCommand("&attack", "<username>", "Bonks a fellow gamer")
+@registeredCommand("&attack", "<username>", "bonks a fellow gamer")
 class AttackCommand extends Command {
     constructor(username, targetUser) {
         super(username)
