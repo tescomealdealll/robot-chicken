@@ -12,6 +12,7 @@ const { Vec3 } = require('vec3')
 const langDetector = new (require('languagedetect'))
 const moment = require('moment')
 const levenshtein = require('fast-levenshtein')
+const path = require('path')
  
 const { Client, GatewayIntentBits, EmbedBuilder, WebhookClient, Attachment } = require('discord.js')
 const { MessageContent, GuildMessages, Guilds, GuildMembers } = GatewayIntentBits
@@ -2445,6 +2446,7 @@ function registerBotListeners() {
 }
 /* END OF BOT MECHANICS */
 
+clearUpdateLockFile()
 initBlacklist()
 initDatabase()
 initDiscord()
