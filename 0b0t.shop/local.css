@@ -1,0 +1,74 @@
+html {
+    background-image:url('bg-wool-dark.png');
+    background-position: center center;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    height: 100%; 
+    overflow: hidden;
+}
+
+body {           
+    height:100%;
+    overflow: scroll;
+}
+
+.tabs {
+    list-style-type: none;
+    display: flex;
+}
+
+.tabs li {
+    margin-right: 10px;
+    font-family: minecraft;
+    font-weight:300;
+    font-size:48px;
+    color:#e1e1e1;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tabs a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.tabs li {
+    margin-right: 50px;
+}
+
+.tabs a {
+    text-decoration: none;
+    padding: 10px 15px;
+    background-color: #f0f0f0;
+    color: #333;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
+}
+
+.tabs a:hover {
+    background-color: #ddd; 
+}
+
+#tab2 {
+    font-family: minecraft;
+    font-size:19px;
+    color:#fff
+}
+
+#tab3 {
+    font-family: minecraft;
+    font-size:19px;
+    color:#fff
+}
+
+ul {
+    list-style-type: none; /* Remove default list bullets or numbers */
+}
+
+li {
+    margin-bottom: 40px; /* Adjust the value to control the spacing */
+}
