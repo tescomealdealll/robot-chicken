@@ -419,6 +419,23 @@ function forwardDiscordBridge(username, message, server) {
 /* END OF DISCORD FUNCTIONS */
 
 /* START DATABASE-RELATED FUNCTIONS */
+async function clearUpdateLockFile() {
+    try {
+        const filePath = path.join(__dirname, "updateInProgress")
+        await fs.unlink(filePath)
+    } catch (err) {
+        console.error(`Error deleting file: ${err}`)
+        process.exit(1)
+    }
+}
+
+function isUpdating() {
+    const filePath = path.join(__dirname, "updateInProgress");
+    return fs.access(filePath)
+        .then(() => true)
+        .catch(() => false)
+}
+
 function initBlacklist() {
     fs.access(BLACKLIST_FILE, fs.constants.F_OK)
     .then(() => {
@@ -1225,6 +1242,10 @@ class DupeCommand extends Command {
             speak(`I can't dupe right now, there's someone nearby`)
             return
         }
+        if(isUpdating()) {
+            speak(`I'm about to update, try again in a few seconds`)
+            return
+        }
         lock = this
         log('Started duping for ' + this.username)
         DupeCommand.dupingFor = this.username 
@@ -1363,6 +1384,10 @@ class KitCommand extends Command {
             speak('&kit is out of order. Try again later')
             return
         }
+        if(isUpdating()) {
+            speak(`I'm about to update, try again in a few seconds`)
+            return
+        }
         if(lock) {
             lock.checkLocked(this.username)
             return
@@ -1471,6 +1496,10 @@ class MailCommand extends Command {
         }
         if(!this.mailingTo) {
             speak(`&mail <username> requires a username argument`)
+            return
+        }
+        if(isUpdating()) {
+            speak(`I'm about to update, try again in a few seconds`)
             return
         }
         if(lock) {
