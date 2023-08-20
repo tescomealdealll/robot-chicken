@@ -1348,8 +1348,9 @@ class KitCommand extends Command {
         let chest = null
         let kitPosGround = this.getKitPosGround()
         if(kitPosGround.distanceTo(bot.entity.position) > 300) {
-            speak(`I'm too far away from the stash. This shouldn't happen. Automatically rage quitting`)
-            process.exit(1)
+            speak(`I'm too far away from the stash. This shouldn't happen. Try again in a few seconds`)
+            this.reset(true)
+            return
         }
         let kitPosChest = kitSide == 1 ? kitPosGround.offset(-1, 0, 0) : kitPosGround.offset(1, 1, 0)
         await walkTo(kitPosGround)
