@@ -29,6 +29,9 @@ body {
 
 .tab-content {
     display: none;
+    font-family: minecraft;
+    font-size:19px;
+    color:#fff
 }
 
 .tabs a {
@@ -53,22 +56,21 @@ body {
     background-color: #ddd; 
 }
 
-#tab2 {
-    font-family: minecraft;
-    font-size:19px;
-    color:#fff
-}
-
-#tab3 {
-    font-family: minecraft;
-    font-size:19px;
-    color:#fff
-}
-
 ul {
-    list-style-type: none; /* Remove default list bullets or numbers */
+    list-style-type: none;
 }
 
 li {
-    margin-bottom: 40px; /* Adjust the value to control the spacing */
+    margin-bottom: 40px;
+}
+
+@media screen and (max-width: 768px) {
+    .tabs {
+        flex-direction: column;
+    }
+
+    .tabs li {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
 }
