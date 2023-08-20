@@ -24,6 +24,7 @@ process.on('uncaughtException', (error) => {
 /* END OF ERROR HANDLING OR LACK THEREOF */
 
 /* START OF CONSTANTS */
+const OUR_WEBSITE = 'https://robot-chicken.neocities.org'
 const DISPLAY_CHAT = true
 const BED_POS = new Vec3(...process.env.BED.match(/(\S+),(\S+),(\S+)/).slice(1).map(Number))
 const START_TIME = moment()
@@ -46,7 +47,7 @@ const PROMOTION_MESSAGES = [
     ",Tired of duping manually? Just type &dupe, and you're set!",
     ',Get expert advice today with &askgpt command!',
     ',Drop by the discord bridge! https://discord.gg/fegUKHTwQd',
-    ",Try &kit today! You can see the list here: `https://robot-chicken.tiiny.site",
+    ",Try &kit today! You can see the list here: `" + OUR_WEBSITE,
     ",Need to send someone items? Just &mail them!",
     ",I can anonymize messages, just /whisper it to me!",
 ]
@@ -856,7 +857,7 @@ class UptimeCommand extends Command {
 @registeredCommand("&kits", "", "shows the kit menu")
 class KitsCommand extends Command {
     execute() {
-        speak(`You can check the list of kits and their IDs here: \`https://robot-chicken.tiiny.site`)
+        speak(`You can check the list of kits and their IDs here: \`${OUR_WEBSITE}`)
     }
 }
 
@@ -1288,7 +1289,7 @@ class DupeCommand extends Command {
     }
 }
 
-@registeredCommand("&kit", "[kitId]", "gives you one of these kits: https://robot-chicken.tiiny.site")
+@registeredCommand("&kit", "[kitId]", "gives you one of these kits: " + OUR_WEBSITE)
 class KitCommand extends Command {
     static cooldown = {}
     static kitFor = null
@@ -1334,13 +1335,13 @@ class KitCommand extends Command {
         let kitMatches2 = levenshteinDiffSortedMatches(KITS_2)
         let kitMatches = kitMatches1.length > 0 || kitMatches2.length > 0
         if(!kitMatches) {
-            speak('< Unknown kit. Check the IDs under the images here: `https://robot-chicken.tiiny.site')
+            speak('< Unknown kit. Check the IDs under the images here: `' + OUR_WEBSITE)
             this.kitId = null
         } else {
             let side = kitMatches1.length > 0 ? 1 : 2
             this.kitId = side == 1 ? kitMatches1[0] : kitMatches2[0]
             if(EXCLUSIVE_KITS.hasOwnProperty(this.kitId) && !VIP.includes(this.username)) {
-                speak('< Unknown kit. Check the IDs under the images here: `https://robot-chicken.tiiny.site')
+                speak('< Unknown kit. Check the IDs under the images here: `' + OUR_WEBSITE)
                 this.kitId = null
                 return null
             }
