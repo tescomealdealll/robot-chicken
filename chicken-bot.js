@@ -431,10 +431,13 @@ async function clearUpdateLockFile() {
 }
 
 function isUpdating() {
-    const filePath = path.join(__dirname, "updateInProgress");
-    return fs.access(filePath)
-        .then(() => true)
-        .catch(() => false)
+    const filePath = path.join(__dirname, "updateInProgress")
+    try {
+        fs.accessSync(filePath)
+        return true;
+    } catch (error) {
+        return false;
+    }
 }
 
 function initBlacklist() {
