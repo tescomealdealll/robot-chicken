@@ -1159,6 +1159,37 @@ class DupeCommand extends Command {
         lock = null
     }
 
+    async fixChestIfNeeded() {
+        log('Checking chest status')
+        let chestBlock = bot.blockAt(BED_POS.offset(3, 0, 0))
+        let chest = await bot.openContainer(chestBlock)
+        critical = true
+        let emptySlots = getEmptySlots(chest)
+        if(emptySlots.length > 0) {
+            log('Chest is not full')
+            return
+        } else {
+            log('Chest is borked')
+        }
+        // unbork stack 1
+        for(let slot=0; slot < 16; slot++) {
+            await bot.simpleClick.leftMouse(slot).catch(()=>{})
+            await bot.waitForTicks(2)
+            await bot.simpleClick.leftMouse(0).catch(()=>{})
+            await bot.waitForTicks(2)
+        }
+        // unbork stack 2
+        for(let slot=16; slot < 27; slot++) {
+            await bot.simpleClick.leftMouse(slot).catch(()=>{})
+            await bot.waitForTicks(2)
+            await bot.simpleClick.leftMouse(1).catch(()=>{})
+            await bot.waitForTicks(2)
+        }
+        chest.close()
+        critical = false
+        log('Done fixing chest')
+    }
+
     checkLocked(username) {
         if(DupeCommand.dupingFor == username) {
             speak(`< Wait, I'm duping for you!`)
@@ -1211,9 +1242,11 @@ class DupeCommand extends Command {
         if(!DupeCommand.dupingFor)
             return
         kill()
-        await sleeps(2)
+        await sleeps(1)
         await massWithdrawEnderchest()
-        await sleeps(2)
+        await sleeps(1)
+        await this.fixChestIfNeeded()
+        await sleeps(1)
         await massDepositChest()
         log('Quitting 1')
         bot.quit()
@@ -1223,7 +1256,7 @@ class DupeCommand extends Command {
         await sleeps(21)
         log('done sleeping 21s')
         createBot()
-        await sleeps(5)
+        await sleeps(2)
         if(!DupeCommand.dupingFor)
             return
         await massWithdrawChest()
@@ -1371,8 +1404,8 @@ class KitCommand extends Command {
         let shulkerSlots = getShulkerSlotsFromChest(chest).filter(slot => slot < 27)
         if(shulkerSlots.length == 0) {
             speak(`I'm out of ${KitCommand.kitId} kits, yell about this on the discord`)
-            critical = false
             chest.close()
+            critical = false
             this.reset(true)
             return
         }
@@ -1383,8 +1416,8 @@ class KitCommand extends Command {
         await bot.waitForTicks(10)
         await bot.simpleClick.leftMouse(to).catch(()=>{})
         await bot.waitForTicks(10)
-        critical = false
         chest.close()
+        critical = false
         tpaTo(KitCommand.kitFor)
         await waitForPlayer(KitCommand.kitFor).then(() => {
             if(KitCommand.kitFor) {
@@ -1537,15 +1570,15 @@ class AttackCommand extends Command {
         }
         let swordSlots = chest.slots.filter(item => item?.type == 276).map(item=>item.slot)
         if(swordSlots.length == 0) {
-            critical = false
             chest.close()
+            critical = false
             return false
         }
         await bot.simpleClick.leftMouse(swordSlots[0]).catch(()=>{})
         await bot.waitForTicks(10)
         await bot.simpleClick.leftMouse(27).catch(()=>{})
-        critical = false
         chest.close()
+        critical = false
         await moveItemToHand(276)
         return true
     }
@@ -1661,6 +1694,10 @@ function getEmptySlots(chest) {
     return chest.slots.reduce((acc, val, index) => val === null ? [...acc, index] : acc, []).filter((slot) => slot < 27)
 }
 
+function getBookSlotsFromChest(chest) {
+    return chest.slots.filter(item => item?.type == 387).map(item=>item.slot)
+}
+
 function getShulkerSlotsFromChest(chest) {
     return chest.slots.filter(item => item?.name.includes('shulker')).map(item=>item.slot)
 }
@@ -1692,8 +1729,8 @@ async function spreadBooks() {
             count--
         }
     }
-    critical = false
     chest.close()
+    critical = false
     log('Done spreading books')
 }
 
@@ -1799,7 +1836,7 @@ async function forEnderchest(username) {
             let referenceBlock = getReferenceBlock()
             let faceVector = new Vec3(0, 1, 0)
             await bot.placeBlock(referenceBlock, faceVector)
-            await bot.waitForTicks(3)
+            await bot.waitForTicks(10)
             continue
         }
         if(!lock)
@@ -1845,8 +1882,8 @@ async function massWithdrawEnderchest() {
         await bot.simpleClick.leftMouse(to).catch(()=>{})
         invSlot++
     }
-    critical = false
     chest.close()
+    critical = false
     log('Done withdrawing from enderchest')
 }
 
@@ -1917,8 +1954,8 @@ async function massWithdrawChest() {
         await bot.simpleClick.leftMouse(to).catch(()=>{})
         log(`Moving from ${from_} to ${to}`)
     }
-    critical = false
     chest.close()
+    critical = false
     log('Done withdrawing from chest')
 }
 
@@ -1938,8 +1975,8 @@ async function massDepositChest() {
         await bot.simpleClick.leftMouse(from_).catch(()=>{})
         await bot.simpleClick.leftMouse(to).catch(()=>{})
     }
-    critical = false
     chest.close()
+    critical = false
     log('Done depositing to chest')
 }
 
@@ -1965,8 +2002,8 @@ async function massDepositEnderchest() {
         await bot.waitForTicks(10)
         await bot.simpleClick.leftMouse(to).catch(()=>{})
     }
-    critical = false
     chest.close()
+    critical = false
     log('Done depositing to enderchest')
 }
 
