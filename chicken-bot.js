@@ -1203,11 +1203,6 @@ class DupeCommand extends Command {
             speak('&dupe is out of order. Try again later')
             return
         }
-        if(BED_POS.distanceTo(bot.entity.position) > 300) {
-            speak(`I'm too far away from the stash. This shouldn't happen. Try again in a few seconds`)
-            this.reset(true)
-            return
-        }
         if(DupeCommand.cooldown.hasOwnProperty(this.username)) {
             let duration = moment.duration(moment().diff(DupeCommand.cooldown[this.username])).asSeconds()
             if(duration < 40 && duration > 0) {
@@ -1218,6 +1213,11 @@ class DupeCommand extends Command {
         }
         if(lock) {
             lock.checkLocked(this.username)
+            return
+        }
+        if(BED_POS.distanceTo(bot.entity.position) > 300) {
+            speak(`I'm too far away from the stash. This shouldn't happen. Try again in a few seconds`)
+            this.reset(true)
             return
         }
         if(Object.values(bot.entities).filter(entity=>entity.type=='player').length > 1) {
