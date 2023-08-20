@@ -1,4 +1,4 @@
-//* START OF IMPORTS */
+/* START OF IMPORTS */
 require('./env.js') // load environment variables
 const Mineflayer = require('mineflayer')
 const { pathfinder, Movements, goals: { GoalNear } } = require('mineflayer-pathfinder')
