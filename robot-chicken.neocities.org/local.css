@@ -15,13 +15,14 @@ body {
 }
 
 .tabs {
+    padding-top: 30px;
     list-style-type: none;
     display: flex;
 }
 
 .tabs li {
     margin-right: 10px;
-    font-family: minecraft;
+    font-family: Monocraft;
     font-weight:300;
     font-size:48px;
     color:#e1e1e1;
@@ -29,7 +30,7 @@ body {
 
 .tab-content {
     display: none;
-    font-family: minecraft;
+    font-family: Monocraft;
     font-size:19px;
     color:#fff
 }
@@ -53,7 +54,7 @@ body {
 }
 
 .tabs a:hover {
-    background-color: #ddd; 
+    background-color: #FFAA00; 
 }
 
 ul {
@@ -77,4 +78,9 @@ li {
         margin-right: 0;
         margin-bottom: 10px;
     }
+}
+
+@font-face {
+  font-family: 'Monocraft';
+  src: url('Monocraft.ttf') format('truetype');
 }
