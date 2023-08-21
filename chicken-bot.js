@@ -434,9 +434,9 @@ function isUpdating() {
     const filePath = path.join(__dirname, "updateInProgress")
     try {
         fs.accessSync(filePath)
-        return true;
+        return true
     } catch (error) {
-        return false;
+        return false
     }
 }
 
@@ -1184,8 +1184,8 @@ class DupeCommand extends Command {
     async fixChestIfNeeded() {
         log('Checking chest status')
         let chestBlock = bot.blockAt(BED_POS.offset(3, 0, 0))
-        let chest = await bot.openContainer(chestBlock)
         critical = true
+        let chest = await bot.openContainer(chestBlock)
         let emptySlots = getEmptySlots(chest)
         if(emptySlots.length > 0) {
             log('Chest is not full')
@@ -1425,8 +1425,8 @@ class KitCommand extends Command {
         while(!chest) {
             try {
                 let chestBlock = bot.blockAt(kitPosChest)
-                chest = await bot.openContainer(chestBlock)
                 critical = true
+                chest = await bot.openContainer(chestBlock)
             } catch(error) {
                 log(error)
             }
@@ -1596,8 +1596,8 @@ class AttackCommand extends Command {
         let swordChestBlock = bot.blockAt(BED_POS.offset(2, 1, -3))
         let chest = null
         try {
-            chest = await bot.openContainer(swordChestBlock)
             critical = true
+            chest = await bot.openContainer(swordChestBlock)
         } catch(error) {
             log(chest)
             log(error)
@@ -1747,8 +1747,8 @@ async function spreadBooks() {
         await sleeps(1)
     }
     let chestBlock = bot.blockAt(BED_POS.offset(3, 0, 0))
-    let chest = await bot.openContainer(chestBlock)
     critical = true
+    let chest = await bot.openContainer(chestBlock)
     while(!areBooksSpread(chest)) {
         let [slot, count] = getStackedBooksSlot(chest)
         if(slot == -1)
@@ -1900,8 +1900,8 @@ async function massWithdrawEnderchest() {
     let chestBlock = bot.blockAt(BED_POS.offset(2, 0, 0))
     let chest = null
     try {
-        chest = await bot.openContainer(chestBlock)
         critical = true
+        chest = await bot.openContainer(chestBlock)
     } catch(error) {
         log(chest)
         log(error)
@@ -1996,8 +1996,8 @@ async function massWithdrawChest() {
 async function massDepositChest() {
     log('Depositing to chest')
     let chestBlock = bot.blockAt(BED_POS.offset(3, 0, 0))
-    let chest = await bot.openContainer(chestBlock)
     critical = true
+    let chest = await bot.openContainer(chestBlock)
     let emptySlots = getEmptySlots(chest)
     let shulkerSlots = getShulkerSlots()
     if(shulkerSlots.length == 0)
@@ -2017,6 +2017,7 @@ async function massDepositChest() {
 async function massDepositEnderchest() {
     log('Depositing to enderchest')
     let chestBlock = await bot.findBlock({ matching: [130], maxDistance: 5 })
+    critical = true
     let chest = await bot.openContainer(chestBlock, new Vec3(0, -1, 0))
     let emptySlots = getEmptySlots(chest)
     let shulkerSlots = getShulkerSlots()
@@ -2026,7 +2027,6 @@ async function massDepositEnderchest() {
         return
     }
     let max = Math.min(shulkerSlots.length, 18)
-    critical = true
     for(let i = 0; i < max; i++) {
         if(!lock)
             return
