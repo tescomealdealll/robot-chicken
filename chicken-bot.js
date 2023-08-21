@@ -2350,7 +2350,8 @@ function registerBotListeners() {
         }
         if(playerNotFound) {
             log('Player not found to tp, resetting')
-            lock.reset(true)
+            if(lock)
+                lock.reset(true)
         }
         if(walkABlock) {
             log('Should walk a block')
