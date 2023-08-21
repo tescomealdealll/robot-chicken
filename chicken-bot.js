@@ -644,10 +644,10 @@ async function speakRoutine() {
     let initTicks = ticks
     speaking = true
     let message = speakQueue.shift()
-    while(ticks - lastMessageTicks < 85)
-        await sleep(200)
+    while(ticks - lastMessageTicks < 80)
+        await sleep(20)
     while(isWalking)
-        await sleep(200)
+        await sleep(20)
     try {
         bot.chat(message)
         lastMessage = message
@@ -706,15 +706,7 @@ class HelpCommand extends Command {
                 speak(`< There's no such command YET`)
             }
         } else {
-            let longHelp = ',Commands: ' + commandHandler.getAll()
-                .map(commandClass => commandClass.prototype.id + ' ' + commandClass.prototype.args).join(', ')
-            let blocks = splitStringIntoBlocks(longHelp, 99)
-            for (const [index, block] of blocks.entries()) {
-                let message = block + ` (${index+1}/${blocks.length})`
-                if(index != 0)
-                    message = ',.. ' + message
-                speak(message)
-            }
+            speak(`You can see all the commands here: \`${OUR_WEBSITE}/#commands`)
         }
     }
 }
