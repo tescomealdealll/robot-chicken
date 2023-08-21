@@ -9,6 +9,10 @@ html {
     overflow: hidden;
 }
 
+a {
+    user-select: none;
+}
+
 body {           
     height:100%;
     overflow: scroll;
