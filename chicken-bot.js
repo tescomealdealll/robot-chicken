@@ -78,6 +78,7 @@ const KITS_2 = {
     'kit'             : BED_POS.offset( 4, 0, -17), // https://i.imgur.com/X7IwX5i.png
     'sand'            : BED_POS.offset( 4, 0, -16), // https://i.imgur.com/z0HkbVD.png
     'lava'            : BED_POS.offset( 4, 0, -15), // https://i.imgur.com/l0X8gJl.png
+    'signs'           : BED_POS.offset( 4, 0, -14), // https://i.imgur.com/51ZzDuA.png
 }
 const KITS_1 = {
     'tree'            : BED_POS.offset(-4, 0,  19), // https://i.imgur.com/nRUlj2e.png
