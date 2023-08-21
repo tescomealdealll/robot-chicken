@@ -55,9 +55,23 @@ const PROMOTION_MESSAGES = [
 const COMMAND_PREFIXES = ['!', '&', '$', '?', '*', '%', '>', ':']
 const WEBHOOK = new WebhookClient({ url: `http://discord.com/api/webhooks/1131047779817500793/${process.env.WEBHOOK_ID}` }) // thanks Cody4687
 
-const VIP = ['antonymph', 'antonymphs', 'AstolfoIsKing', 'prljav', '_Nether_Chicken', 'PayTheParrot', 'lilkitkat1'] // cooldown removed, more kits!
-const VVIP = ['antonymph', 'antonymphs', '_Nether_Chicken'] // reset priviledges!!
-const VVVIP = ['_Nether_Chicken'] // tp and whisper command priviledge!!!
+const VIP = [ // cooldown removed, more kits!
+    'antonymph', 
+    'antonymphs', 
+    'AstolfoIsKing', 
+    'prljav', 
+    '_Nether_Chicken', 
+    'PayTheParrot', 
+    'lilkitkat1'
+    ]
+const VVIP = [ // reset priviledges!!
+    'antonymph', 
+    'antonymphs', 
+    '_Nether_Chicken'
+    ]
+const VVVIP = [ // tp and whisper command priviledge!!!
+    '_Nether_Chicken'
+] 
 
 const EXCLUSIVE_KITS = ['lava', 'obsidian', 'tnt', 'grief', 'illegal']
 const KITS_2 = {
@@ -2313,6 +2327,7 @@ function registerBotListeners() {
                 speak(`< ${MailCommand.mailingTo} forgot to accept my tp request to receive some mail from ${MailCommand.mailingFor}`)
                 lock.reset(true)
             }
+            tpingTo = null
         }
         if(matchesTpRequestDenied) {
             const fromWho = matchesTpRequestDenied[1]
@@ -2330,6 +2345,7 @@ function registerBotListeners() {
                 speak(`< ${MailCommand.mailingTo} denied my tp request to receive some mail from ${MailCommand.mailingFor}`)
             }
             lock.reset(true)
+            tpingTo = null
         }
         if(playerNotFound) {
             log('Player not found to tp, resetting')
