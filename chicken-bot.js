@@ -2134,7 +2134,7 @@ function registerBotListeners() {
         log(`Disconnected for reason: ${reason}`)
         if(reason == 'disconnect.quitting')
             return
-        if(DupeCommand.dupingFor && reason != 'encryptionLoginError')
+        if(DupeCommand.dupingFor && (reason != 'encryptionLoginError' || reason != 'keepAliveError'))
             return
         log('Auto-Reconnecting')
         if(bot)
@@ -2313,21 +2313,12 @@ function registerBotListeners() {
         }
         if(matchesTimeout) {
             const fromWho = matchesTimeout[1]
-            if(DupeCommand.dupingFor == fromWho) {
+            if(DupeCommand.dupingFor == fromWho)
                 speak(`< ${DupeCommand.dupingFor} forgot to accept my tp request`)
-                lock.reset(true)
-            }
-            if(KitCommand.kitFor == fromWho) {
-                lock.reset(true)
-            }
-            if(MailCommand.mailingFor == fromWho) {
+            if(MailCommand.mailingFor == fromWho)
                 speak(`< ${MailCommand.mailingFor} forgot to accept my tp request to send some mail to ${MailCommand.mailingTo}`)
-                lock.reset()
-            }
-            if(MailCommand.mailingTo == fromWho) {
+            if(MailCommand.mailingTo == fromWho)
                 speak(`< ${MailCommand.mailingTo} forgot to accept my tp request to receive some mail from ${MailCommand.mailingFor}`)
-                lock.reset(true)
-            }
             if(lock)
                 lock.reset(true)
             tpingTo = null
