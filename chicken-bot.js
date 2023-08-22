@@ -2328,6 +2328,8 @@ function registerBotListeners() {
                 speak(`< ${MailCommand.mailingTo} forgot to accept my tp request to receive some mail from ${MailCommand.mailingFor}`)
                 lock.reset(true)
             }
+            if(lock)
+                lock.reset(true)
             tpingTo = null
         }
         if(matchesTpRequestDenied) {
