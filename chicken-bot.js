@@ -79,6 +79,7 @@ const KITS_2 = {
     'sand'            : BED_POS.offset( 4, 0, -16), // https://i.imgur.com/z0HkbVD.png
     'lava'            : BED_POS.offset( 4, 0, -15), // https://i.imgur.com/l0X8gJl.png
     'signs'           : BED_POS.offset( 4, 0, -14), // https://i.imgur.com/51ZzDuA.png
+    'end'             : BED_POS.offset( 4, 0, -13), // https://i.imgur.com/SEB6z5T.png
 }
 const KITS_1 = {
     'tree'            : BED_POS.offset(-4, 0,  19), // https://i.imgur.com/nRUlj2e.png
@@ -2014,8 +2015,10 @@ async function massDepositChest() {
         let from_ = shulkerSlots[i] + 18
         let to = emptySlots[i]
         await bot.simpleClick.leftMouse(from_).catch(()=>{})
+        await bot.waitForTicks(1)
         await bot.simpleClick.leftMouse(to).catch(()=>{})
     }
+    await bot.waitForTicks(2)
     chest.close()
     critical = false
     log('Done depositing to chest')
