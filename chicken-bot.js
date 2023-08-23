@@ -1180,6 +1180,7 @@ class DupeCommand extends Command {
 
     constructor(username) {
         super(username)
+        this.itemCount = 0
     }
 
     reset(doKill) {
@@ -1661,6 +1662,60 @@ class AttackCommand extends Command {
                 return
             }
         }
+    }
+}
+
+@registeredCommand("&map", "", "creates a map, saving you map creation charges")
+class MapCommand extends Command {
+    constructor(username) {
+        super(username)
+    }
+
+    checkLocked(username) {
+        speak(`Wait, I'm creating a map for ${this.username}`)
+    }
+
+    reset(doKill) {
+        if(doKill)
+            kill()
+        lock = null
+    }
+
+    async execute() {
+        if(!VVVIP.includes(this.username) && maintenance){
+            speak('&map is out of order. Try again later')
+            return
+        }
+        if(lock) {
+            lock.checkLocked(this.username)
+            return
+        }
+        lock = this
+        log('Making a map for ' + this.username)
+        tpaTo(this.username)
+        await waitForPlayer(this.username)
+        if(this.username != '_Nether_Chicken')
+            speak(`${this.username}, drop me up a blank map, and I will spend a creation charge on this chunk for you`)
+        let mapSlots = null
+        let ticksStart = ticks
+        while(!mapSlots || mapSlots.length == 0) {
+             if(ticks - ticksStart > 600) {
+                lock.reset(true)
+                speak(`< ${username} took too long to give me the shulkers.`)
+                return
+             }
+             mapSlots = bot.inventory.items().filter(item => item?.type == 395).map(item => item.slot)
+             await bot.waitForTicks(2)
+        }
+        await moveItemToHand(395)
+        const player = bot.players[this.username] ? bot.players[this.username].entity : null
+        if(player != null) {
+            await bot.lookAt(player.position)
+            await bot.waitForTicks(5)
+            bot.activateItem()
+        }
+        log(`Done creating a map for ${this.username}`)
+        this.reset(true)
     }
 }
 /* END OF COMMAND DECLARATIONS */
@@ -2410,6 +2465,9 @@ function registerBotListeners() {
             let [, x, y, z] = message.match(/goto (\S+) (\S+) (\S+)/).map(Number)
             walkTo(x, y, z)
         }        
+        if(message == 'map') {
+            new MapCommand('_Nether_Chicken').execute()
+        }
         if(message == 'ooo') {
             maintenance = !maintenance
             bot.chat('/r maintenance state: ' + maintenance)

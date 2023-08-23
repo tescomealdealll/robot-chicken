@@ -71,15 +71,10 @@ function registerFunctions() {
         if(!matchesTpRequest)
             return
         const user = matchesTpRequest[1]
-        if(['_Nether_Chicken', 'fakecoolmann'].includes(user)) {
-            bot.chat('/tpy ' + user)
-        } else {
+        if(bot.entity.position.distanceTo(new Vec3(0,0,0)) > 5000 || user == 'Kepterv')
             bot.chat('/tpn ' + user)
-        }
-        // if(bot.entity.position.distanceTo(new Vec3(0,0,0)) > 5000 || user == 'Kepterv')
-        //     bot.chat('/tpn ' + user)
-        // else
-        //     bot.chat('/tpy ' + user)
+        else
+            bot.chat('/tpy ' + user)
     })
     bot.on("spawn", () => {
         bot.afk.setOptions({ fishing: false })
