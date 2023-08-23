@@ -41,6 +41,7 @@ const BRIDGE_CHANNEL_ID = '1113295943140380703'
 const SOURCE_CHANNEL_ID = '1131397353107116193'
 const PLAYER_CHANNEL_ID = '1135339325446426714'
 const SOURCE_MESSAGE_ID = '1131398231868313670'
+const LOGS_CHANNEL_ID = '1143955427864887426'
 const SPAM_SIMILARITY_CHECK = 0.88
 const PROMOTION_MESSAGES = [
     ',Try &dupe today! Make sure to have an enderchest nearby. You can see my other commands with &help',
@@ -209,6 +210,7 @@ let bridgeChannel = null
 let sourceChannel = null
 let randomChannel = null
 let playerChannel = null
+let logsChannel = null
 let bot = null
 let ticks = 0
 let firstInit = true
@@ -298,6 +300,7 @@ function initDiscord() {
         sourceChannel = client.channels.cache.get(SOURCE_CHANNEL_ID)
         randomChannel = client.channels.cache.get(RANDOM_CHANNEL_ID)
         playerChannel = client.channels.cache.get(PLAYER_CHANNEL_ID)
+        logsChannel = client.channels.cache.get(LOGS_CHANNEL_ID)
         bridgeChannel.guild.members.fetch()
         if (!bridgeChannel) {
             log(`I could not find the bridge channel!`)
@@ -576,6 +579,8 @@ function log(message, chat) {
     if(!DISPLAY_CHAT && chat)
         return
     console.log(`[${timestamp()}][${chat ? 'CHAT' : 'SELF'}]: ${message}`)
+    if(logsChannel && !chat)
+        logsChannel.send(message)
 }
 
 async function getEmojis() {
