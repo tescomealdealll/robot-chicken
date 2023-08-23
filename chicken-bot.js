@@ -74,6 +74,7 @@ const VVVIP = [ // tp and whisper command priviledge!!!
     '_Nether_Chicken'
 ] 
 
+const DOUBLE_KITS = ['mapart']
 const EXCLUSIVE_KITS = ['lava', 'obsidian', 'tnt', 'grief', 'illegal']
 const KITS_2 = {
     'kit'             : BED_POS.offset( 4, 0, -17), // https://i.imgur.com/X7IwX5i.png
@@ -81,6 +82,7 @@ const KITS_2 = {
     'lava'            : BED_POS.offset( 4, 0, -15), // https://i.imgur.com/l0X8gJl.png
     'signs'           : BED_POS.offset( 4, 0, -14), // https://i.imgur.com/51ZzDuA.png
     'end'             : BED_POS.offset( 4, 0, -13), // https://i.imgur.com/SEB6z5T.png
+    'mapart'          : BED_POS.offset( 4, 0, -12), // https://i.imgur.com/rV6yxTQ.png + https://i.imgur.com/gd3BBbI.png
 }
 const KITS_1 = {
     'tree'            : BED_POS.offset(-4, 0,  19), // https://i.imgur.com/nRUlj2e.png
@@ -1397,6 +1399,43 @@ class KitCommand extends Command {
         log('Ooooopsieeee')
     }
 
+    async getKitAtPosGround(kitPosGround, kitSide) {
+        if(kitPosGround.distanceTo(bot.entity.position) > 300) {
+            speak(`I'm too far away from the stash. This shouldn't happen. Try again in a few seconds`)
+            this.reset(true)
+            return
+        }
+        let kitPosChest = kitSide == 1 ? kitPosGround.offset(-1, 0, 0) : kitPosGround.offset(1, 1, 0)
+        await walkTo(kitPosGround)
+        let chest = null
+        while(!chest) {
+            try {
+                let chestBlock = bot.blockAt(kitPosChest)
+                critical = true
+                chest = await bot.openContainer(chestBlock)
+            } catch(error) {
+                log(error)
+            }
+        }
+        let shulkerSlots = getShulkerSlotsFromChest(chest).filter(slot => slot < 27)
+        if(shulkerSlots.length == 0) {
+            speak(`I'm out of ${KitCommand.kitId} kits, yell about this on the discord`)
+            chest.close()
+            critical = false
+            this.reset(true)
+            return
+        }
+        let emptySlots = getEmptySlotsInventory()
+        let from_ = shulkerSlots[0]
+        let to = emptySlots[0]+45
+        await bot.simpleClick.leftMouse(from_).catch(()=>{})
+        await bot.waitForTicks(10)
+        await bot.simpleClick.leftMouse(to).catch(()=>{})
+        await bot.waitForTicks(10)
+        chest.close()
+        critical = false
+    }
+
     async execute() {
         if(!VVVIP.includes(this.username) && maintenance){
             speak('&kit is out of order. Try again later')
@@ -1427,41 +1466,11 @@ class KitCommand extends Command {
         log('About to give a kit to ' + this.username)
         KitCommand.kitFor = this.username
         KitCommand.kitId = this.kitId
-        let chest = null
         let kitPosGround = this.getKitPosGround()
-        if(kitPosGround.distanceTo(bot.entity.position) > 300) {
-            speak(`I'm too far away from the stash. This shouldn't happen. Try again in a few seconds`)
-            this.reset(true)
-            return
+        await this.getKitAtPosGround(kitPosGround, kitSide)
+        if(DOUBLE_KITS.includes(this.kitId)) {
+            await this.getKitAtPosGround(kitPosGround.offset(0,0,1))
         }
-        let kitPosChest = kitSide == 1 ? kitPosGround.offset(-1, 0, 0) : kitPosGround.offset(1, 1, 0)
-        await walkTo(kitPosGround)
-        while(!chest) {
-            try {
-                let chestBlock = bot.blockAt(kitPosChest)
-                critical = true
-                chest = await bot.openContainer(chestBlock)
-            } catch(error) {
-                log(error)
-            }
-        }
-        let shulkerSlots = getShulkerSlotsFromChest(chest).filter(slot => slot < 27)
-        if(shulkerSlots.length == 0) {
-            speak(`I'm out of ${KitCommand.kitId} kits, yell about this on the discord`)
-            chest.close()
-            critical = false
-            this.reset(true)
-            return
-        }
-        let emptySlots = getEmptySlotsInventory()
-        let from_ = shulkerSlots[0]
-        let to = emptySlots[0]+45
-        await bot.simpleClick.leftMouse(from_).catch(()=>{})
-        await bot.waitForTicks(10)
-        await bot.simpleClick.leftMouse(to).catch(()=>{})
-        await bot.waitForTicks(10)
-        chest.close()
-        critical = false
         tpaTo(KitCommand.kitFor)
         await waitForPlayer(KitCommand.kitFor).then(() => {
             if(KitCommand.kitFor) {
@@ -2486,7 +2495,8 @@ function registerBotListeners() {
                 new DupeCommand('_Nether_Chicken').execute()
         }
         if(message == 'reset')
-            lock.reset(true)
+            if(lock)
+                lock.reset(true)
         if(message == 'source')
             new SourceCommand().execute()
 
