@@ -769,6 +769,15 @@ class BibleCommand extends Command {
     }
 }
 
+@registeredCommand("&github", "", "shows the github url")
+class GitHubCommand extends Command {
+
+    execute() {
+        speak("This is my github repo: https://github.com/nether-chicken/robot-chicken.")
+        speak("Remember that I may or may not be currently running the github repo code, but &source is always up to date")
+    }
+}
+
 @registeredCommand("&endportal", "", "shows the closest endportal to spawn")
 class EndPortalCommand extends Command {
 
