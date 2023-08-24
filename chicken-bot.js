@@ -1689,7 +1689,7 @@ class AttackCommand extends Command {
     }
 }
 
-@registeredCommand("&map", "", "creates a map, saving you map creation charges")
+@registeredCommand("&map", "", "creates a map of the chunk you are in, saving you map creation charges")
 class MapCommand extends Command {
     constructor(username) {
         super(username)
@@ -1719,7 +1719,7 @@ class MapCommand extends Command {
         tpaTo(this.username)
         await waitForPlayer(this.username)
         if(this.username != '_Nether_Chicken')
-            speak(`${this.username}, drop me up a blank map, and I will spend a creation charge on this chunk for you`)
+            speak(`${this.username}, drop me a blank map, and I will spend a creation charge on this chunk for you`)
         let mapSlots = null
         let ticksStart = ticks
         while(!mapSlots || mapSlots.length == 0) {
