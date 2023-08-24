@@ -63,7 +63,8 @@ const VIP = [ // cooldown removed, more kits!
     'prljav', 
     '_Nether_Chicken', 
     'PayTheParrot', 
-    'lilkitkat1'
+    'lilkitkat1',
+    'Primooctopus33'
     ]
 const VVIP = [ // reset priviledges!!
     'antonymph', 
