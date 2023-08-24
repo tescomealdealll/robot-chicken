@@ -1726,7 +1726,7 @@ class MapCommand extends Command {
         while(!mapSlots || mapSlots.length == 0) {
              if(ticks - ticksStart > 600) {
                 lock.reset(true)
-                speak(`< ${username} took too long to give me the shulkers.`)
+                speak(`< ${this.username} took too long to give me the map.`)
                 return
              }
              mapSlots = bot.inventory.items().filter(item => item?.type == 395).map(item => item.slot)
