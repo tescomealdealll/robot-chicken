@@ -1,3 +1,28 @@
+# How to run
+
+## With Docker (less wtfs involved)
+
+### Build
+``` 
+docker build -t chicken-bot .
+```
+
+### Run
+
+- For ephemeral database and blacklist:
+
+```
+docker run chicken-bot
+```
+
+- To use current directory as a persistent volume:
+
+```
+docker run -v $(pwd):/chicken-bot chicken-bot
+```
+
+## Without Docker (more wtfs involved)
+
 - Install nodejs
 
 - Install dependencies with: `cd robot-chicken; npm install`
@@ -11,5 +36,6 @@
 - Change env.js.example to your liking and rename it to env.js
 
 - Run the compiled file with `node transpiled-chicken-bot.js` 😎
+
 
 ![zerobee](https://static.wikia.nocookie.net/0b0t/images/5/50/Wiki-background/revision/latest?cb=20200716085243])

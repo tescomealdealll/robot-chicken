@@ -447,7 +447,8 @@ async function clearUpdateLockFile() {
         await fs.unlink(filePath)
     } catch (err) {
         console.error(`Error deleting file: ${err}`)
-        process.exit(1)
+        if (err.code != 'ENOENT')
+            process.exit(1)
     }
 }
 
