@@ -2,12 +2,16 @@
 
 ## With Docker (less wtfs involved)
 
+- Change env.js.example to your liking and rename it to env.js, then:
+
 ### Build
 ``` 
 docker build -t chicken-bot .
 ```
 
 ### Run
+
+You can either run the script with or without a persistent database and blacklist.
 
 - For ephemeral database and blacklist:
 
