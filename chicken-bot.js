@@ -1411,6 +1411,7 @@ class KitCommand extends Command {
     }
 
     async getKitAtPosGround(kitPosGround, kitSide) {
+        log('Getting kit')
         if(kitPosGround.distanceTo(bot.entity.position) > 300) {
             speak(`I'm too far away from the stash. This shouldn't happen. Try again in a few seconds`)
             this.reset(true)
@@ -1420,16 +1421,22 @@ class KitCommand extends Command {
         await walkTo(kitPosGround)
         let chest = null
         while(!chest) {
+            log('About to open kit chest')
             try {
                 let chestBlock = bot.blockAt(kitPosChest)
                 critical = true
                 chest = await bot.openContainer(chestBlock)
+                log('Opened kit chest')
             } catch(error) {
+                log('Error opening kit chest')
                 log(error)
             }
         }
+        log('Getting shulker slots')
         let shulkerSlots = getShulkerSlotsFromChest(chest).filter(slot => slot < 27)
+        log('Got shulkerSlots.length == ' + shulkerSlots.length)
         if(shulkerSlots.length == 0) {
+            log(`I ran out of ${KitCommand.kitId} kits`)
             speak(`I'm out of ${KitCommand.kitId} kits, yell about this on the discord`)
             chest.close()
             critical = false
@@ -1445,6 +1452,7 @@ class KitCommand extends Command {
         await bot.waitForTicks(10)
         chest.close()
         critical = false
+        log('Got kit, probably')
     }
 
     async execute() {
