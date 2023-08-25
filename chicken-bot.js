@@ -1093,6 +1093,22 @@ class DupesCommand extends Command {
     }
 }
 
+@registeredCommand("&gptmode", "<preprompt>", "Sets a new personality for _Robot_Chicken's GPT. Start with '_Robot_Chicken is...'")
+class GPTModeCommand extends Command {
+
+    constructor(username, preprompt) {
+        super(username)
+        this.preprompt = preprompt
+    }
+
+    async execute() {
+        axios.post(`http://${process.env.ORACLE}:5957/preprompt`, {'preprompt': Buffer.from(preventDegeneracy(this.preprompt)).toString('base64')})
+            .then(async (response) => {
+                log('New preprompt set.')
+            })
+    }
+}
+
 @registeredCommand("&askgpt", "<prompt>", "get expert advice")
 class AskGPTCommand extends Command {
     static cooldown = {}
