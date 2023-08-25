@@ -26,6 +26,13 @@ process.on('uncaughtException', (error) => {
 process.on('unhandledRejection', (reason, promise) => {
   console.log('Unhandled Rejection at:', promise, 'reason:', reason)
 })
+
+process.on('SIGTERM', () => {
+    while(savingDatabase || savingBlacklist) {
+        log('Waiting for file writes to shut down')
+        sleeps(1)
+    }
+})
 /* END OF ERROR HANDLING OR LACK THEREOF */
 
 /* START OF CONSTANTS */
@@ -242,6 +249,8 @@ let recentlyDisconnected = false
 let blacklist = []
 let tpingTo = null
 let lastUpdatedImgTabTicks = 0
+let savingDatabase = false
+let savingBlacklist = false
 /* END OF GLOBAL VARS */
 
 /* START OF DISCORD FUNCTIONS */
@@ -557,25 +566,29 @@ function incrementKitCount(username) {
 }
 
 function saveBlacklist() {
+  savingBlacklist = true
   return fs.writeFile(BLACKLIST_FILE, JSON.stringify(blacklist))
-    .then(() => {
-      log('Blacklist saved successfully.')
-    })
-    .catch((err) => {
-      console.error(err)
-      process.exit(1)
-    })
+      .then(() => {
+          savingBlacklist = false
+          log('Blacklist saved successfully.')
+      })
+      .catch((err) => {
+          console.error(err)
+          process.exit(1)
+      })
 }
 
 function saveDatabase() {
+  savingDatabase = true
   return fs.writeFile(DATABASE, JSON.stringify(database))
-    .then(() => {
-      log('Database saved successfully.')
-    })
-    .catch((err) => {
-      console.error(err)
-      process.exit(1)
-    })
+      .then(() => {
+          savingDatabase = false
+          log('Database saved successfully.')
+      })
+      .catch((err) => {
+          console.error(err)
+          process.exit(1)
+      })
 }
 /* END DATABASE-RELATED FUNCTIONS */
 
@@ -1093,7 +1106,7 @@ class DupesCommand extends Command {
     }
 }
 
-@registeredCommand("&gptmode", "<preprompt>", "Sets a new personality for _Robot_Chicken's GPT. Start with '_Robot_Chicken is...'")
+@registeredCommand("&gptmode", "<preprompt>", "Sets a new personality for _Robot_Chicken's GPT. Start with 'Robot Chicken is...'")
 class GPTModeCommand extends Command {
 
     constructor(username, preprompt) {
