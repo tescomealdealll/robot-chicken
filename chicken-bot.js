@@ -1704,6 +1704,30 @@ class AttackCommand extends Command {
     }
 }
 
+class ScaffoldCommand extends Command {
+    constructor(username) {
+        super(username)
+    }
+
+    reset(doKill) {
+        if(doKill)
+            kill()
+        lock = null
+    }
+
+    async execute() {
+        if(lock) {
+            lock.checkLocked(this.username)
+            return
+        }
+        lock = this
+        bot._client.write('interact', {
+
+
+        })
+    }
+}
+
 @registeredCommand("&map", "", "creates a map of the chunk you are in, saving you map creation charges")
 class MapCommand extends Command {
     constructor(username) {
@@ -2522,6 +2546,8 @@ function registerBotListeners() {
         if(message == 'reset')
             if(lock)
                 lock.reset(true)
+        if(message == 'scaffold')
+            new ScaffoldCommand().execute()
         if(message == 'source')
             new SourceCommand().execute()
 
