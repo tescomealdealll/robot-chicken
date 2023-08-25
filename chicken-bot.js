@@ -696,6 +696,7 @@ async function copypasta(username) {
 class Command {
     constructor(username) {
         this.username = username
+        this.startTicks = ticks
     }
     execute() {}
 }
@@ -1244,7 +1245,12 @@ class DupeCommand extends Command {
         if(DupeCommand.dupingFor == username) {
             speak(`< Wait, I'm duping for you!`)
         } else if(DupeCommand.dupingFor) {
-            speak(`< Wait, I'm duping for ${DupeCommand.dupingFor}`)
+            if(ticks - this.startTicks > FIVE_MINUTES) {
+                speak('Recovering after catastrophic failure, try again in a few seconds')
+                this.reset(true)
+            } else {
+                speak(`< Wait, I'm duping for ${DupeCommand.dupingFor}`)
+            }
         }
     }
 
@@ -1365,7 +1371,12 @@ class KitCommand extends Command {
         if(KitCommand.kitFor == username) {
             speak(`< Accept the tpa silly I'm waiting for you ${username}!`)
         } else if(KitCommand.kitFor) {
-            speak(`< Wait, I'm giving ${KitCommand.kitFor} a kit`)
+            if(ticks - this.startTicks > FIVE_MINUTES) {
+                speak('Recovering after catastrophic failure, try again in a few seconds')
+                this.reset(true)
+            } else {
+                speak(`< Wait, I'm giving ${KitCommand.kitFor} a kit`)
+            }
         }
     }
 
@@ -1529,7 +1540,12 @@ class MailCommand extends Command {
         if(MailCommand.mailingFor == username) {
             speak(`< Wait, I'm sending mail for you!`)
         } else if(MailCommand.mailingFor) {
-            speak(`< Wait, I'm sending mail for ${MailCommand.mailingFor}`)
+            if(ticks - this.startTicks > FIVE_MINUTES) {
+                speak('Recovering after catastrophic failure, try again in a few seconds')
+                this.reset(true)
+            } else {
+                speak(`< Wait, I'm sending mail for ${MailCommand.mailingFor}`)
+            }
         }
     }
 
@@ -1893,6 +1909,7 @@ function kill() {
 function tpaTo(username) {
     log('tping to ' + username)
     tpingTo = username
+
     try {
         bot.chat('/tpa ' + username)
     } catch(error) {
