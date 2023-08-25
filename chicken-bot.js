@@ -22,6 +22,10 @@ const { MessageContent, GuildMessages, Guilds, GuildMembers } = GatewayIntentBit
 process.on('uncaughtException', (error) => {
   console.error(`An uncaught exception occurred at ${timestamp()}:`, error)
 })
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.log('Unhandled Rejection at:', promise, 'reason:', reason)
+})
 /* END OF ERROR HANDLING OR LACK THEREOF */
 
 /* START OF CONSTANTS */
@@ -235,6 +239,7 @@ let critical = false
 let recentlyDisconnected = false
 let blacklist = []
 let tpingTo = null
+let lastUpdatedImgTabTicks = 0
 /* END OF GLOBAL VARS */
 
 /* START OF DISCORD FUNCTIONS */
@@ -378,34 +383,31 @@ function initDiscord() {
 async function updatePlayerTabImg() {
     if(!bot || !bot.players || !playerChannel)
         return
+    if(ticks - lastUpdatedImgTabTicks < 100)
+        return
     let playerList = Object.keys(bot.players)
         .map(player => ({ name: player, ping: bot.players[player].ping }))
         .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
-    try {
-        const tablistBase64 = await generateTablist(playerList)
-        const buffer = Buffer.from(tablistBase64.replace("data:image/png;base64,",""), 'base64')
-        const attachment = new Attachment(buffer, { name: 'playerlist.png', contentType: 'image/png' })
-        let existingMessages = await playerChannel.messages.fetch()
-        await playerChannel.send({
-            files: [
-                {
-                    contentType: 'image/png', 
-                    name: 'playerlist.png', 
-                    attachment: buffer
-                }
-            ],
-            flags: [4096]
-        }).then(async ()=>{
-            for(let i=0; i < existingMessages.size; i++) {
-                existingMessages.at(i).delete()
-                .then(()=>{})
-                .catch(()=>{})
+    const tablistBase64 = await generateTablist(playerList).catch(()=>{})
+    const buffer = Buffer.from(tablistBase64.replace("data:image/png;base64,",""), 'base64')
+    const attachment = new Attachment(buffer, { name: 'playerlist.png', contentType: 'image/png' })
+    let existingMessages = await playerChannel.messages.fetch()
+    await playerChannel.send({
+        files: [
+            {
+                contentType: 'image/png', 
+                name: 'playerlist.png', 
+                attachment: buffer
             }
-        })
-    } catch (err) {
-        log('Error while updating playertab img')
-        console.error(err)
-    }
+        ],
+        flags: [4096]
+    }).then(async ()=>{
+        for(let i=0; i < existingMessages.size; i++) {
+            existingMessages.at(i).delete()
+            .then(()=>{})
+            .catch(()=>{})
+        }
+    })
 }
 
 function forwardDiscordBridge(username, message, server) {
@@ -2306,7 +2308,7 @@ function registerBotListeners() {
     bot.once('spawn', async () => {
         bot.on('playerJoined', async (player) => {
             log(`${player.username} joined the game`, true)
-            updatePlayerTabImg().catch(()=>{})
+            await updatePlayerTabImg()
             if(blacklist.includes(player.username))
                 return
             if(player.username == 'Synio' && Math.random() < 0.2)
@@ -2322,7 +2324,7 @@ function registerBotListeners() {
         })
         bot.on('playerLeft', async (player) => {
             log(`${player.username} left the game`, true)
-            updatePlayerTabImg().catch(()=>{})
+            await updatePlayerTabImg()
             if(blacklist.includes(player.username))
                 return
             if(AfkCommand.afkPlayers.hasOwnProperty(player.username))
