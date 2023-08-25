@@ -45,6 +45,7 @@ const BRIDGE_CHANNEL_ID = '1113295943140380703'
 const SOURCE_CHANNEL_ID = '1131397353107116193'
 const PLAYER_CHANNEL_ID = '1135339325446426714'
 const SOURCE_MESSAGE_ID = '1131398231868313670'
+const KIT_RESTOCK_CHANNEL_ID = '1144706233471864983'
 const LOGS_CHANNEL_ID = '1143955427864887426'
 const SPAM_SIMILARITY_CHECK = 0.88
 const PROMOTION_MESSAGES = [
@@ -218,6 +219,7 @@ let sourceChannel = null
 let randomChannel = null
 let playerChannel = null
 let logsChannel = null
+let kitRestockChannel = null
 let bot = null
 let ticks = 0
 let firstInit = true
@@ -309,6 +311,7 @@ function initDiscord() {
         randomChannel = client.channels.cache.get(RANDOM_CHANNEL_ID)
         playerChannel = client.channels.cache.get(PLAYER_CHANNEL_ID)
         logsChannel = client.channels.cache.get(LOGS_CHANNEL_ID)
+        kitRestockChannel = client.channels.cache.get(KIT_RESTOCK_CHANNEL_ID)
         bridgeChannel.guild.members.fetch()
         if (!bridgeChannel) {
             log(`I could not find the bridge channel!`)
@@ -383,7 +386,7 @@ function initDiscord() {
 async function updatePlayerTabImg() {
     if(!bot || !bot.players || !playerChannel)
         return
-    if(ticks - lastUpdatedImgTabTicks < 100)
+    if(ticks - lastUpdatedImgTabTicks < 400)
         return
     let playerList = Object.keys(bot.players)
         .map(player => ({ name: player, ping: bot.players[player].ping }))
@@ -408,6 +411,7 @@ async function updatePlayerTabImg() {
             .catch(()=>{})
         }
     })
+    lastUpdatedImgTabTicks = ticks
 }
 
 function forwardDiscordBridge(username, message, server) {
@@ -1469,6 +1473,7 @@ class KitCommand extends Command {
         if(shulkerSlots.length == 0) {
             log(`I ran out of ${KitCommand.kitId} kits`)
             speak(`I'm out of ${KitCommand.kitId} kits, yell about this on the discord`)
+            kitRestockChannel.send(`I ran out of ${KitCommand.kitId} kits`)
             chest.close()
             critical = false
             this.reset(true)
