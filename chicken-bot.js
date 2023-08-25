@@ -656,6 +656,23 @@ function splitStringIntoBlocks(str, blockSize) {
     return blocks
 }
 
+function preventDegeneracy(message) {
+    return message
+            .replaceAll(/\bkill\b/ig, ' love ')
+            .replaceAll(/torture/ig, 'appreciate')
+            .replaceAll(/crime/ig, 'academic paper')
+            .replaceAll(/molest/ig, 'respect')
+            .replaceAll(/child/ig, 'grown man')
+            .replaceAll(/\bkid\b/ig, ' grown man ')
+            .replaceAll(/infant/ig, 'grown man')
+            .replaceAll(/\bboy\b/ig, ' grown man ')
+            .replaceAll(/minor/ig, 'grown man')
+            .replaceAll(/\bsex\b/ig, ' something I have never had ')
+            .replaceAll(/\brape\b/ig, ' help ')
+            .replaceAll(/nigger/ig, 'digger')
+            .replaceAll(/nigga/ig, 'digga')
+}
+
 function shamelessSelfPromotion() {
     let tipIx = null
     while(!tipIx || tipIx == lastTipIx)
@@ -1101,7 +1118,7 @@ class AskGPTCommand extends Command {
         }
         speak('Hmmmm...')
         AskGPTCommand.answeringGpt = true
-        axios.post(`http://${process.env.ORACLE}:5957/prompt`, {'prompt': Buffer.from(this.question).toString('base64')})
+        axios.post(`http://${process.env.ORACLE}:5957/prompt`, {'prompt': Buffer.from(preventDegeneracy(this.question)).toString('base64')})
             .then(async (response) => {
                 let text = Buffer.from(response.data, 'base64').toString('utf-8').replaceAll('\n', ' ')
                 let replies = splitStringIntoBlocks(text.trim(), 90)
@@ -2213,17 +2230,9 @@ async function anonimize(message) {
     lastAnonimizedMessageTicks = ticks
     let block = message.substring(0,120)
     block = block
-            .replaceAll(/child/ig, 'grown man')
-            .replaceAll(/kid/ig, 'grown man')
-            .replaceAll(/infant/ig, 'grown man')
-            .replaceAll(/\bboy\b/ig, ' grown man ')
-            .replaceAll(/minor/ig, 'grown man')
-            .replaceAll(/sex/ig, 'love')
-            .replaceAll(/rape/ig, 'help')
-            .replaceAll(/nigger/ig, 'digger')
-            .replaceAll(/nigga/ig, 'digga')
             .replaceAll(/(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g, '0b0t.org')
             .replaceAll(/<@&?[0-9]+>/g, '[REDACTED]')
+    block = preventDegeneracy(block)
     let verbs = ['murmured', 'muttered', 'hushed', 'sighed', 'mumbled', 'sibilated', 'uttered quietly', 'susurrated']
     let randomVerb = verbs[Math.floor(Math.random() * verbs.length)]
     if(block)
