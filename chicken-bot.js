@@ -584,7 +584,8 @@ function log(message, chat) {
         return
     console.log(`[${timestamp()}][${chat ? 'CHAT' : 'SELF'}]: ${message}`)
     if(logsChannel && !chat)
-        logsChannel.send(message)
+        if(message)
+            logsChannel.send(message)
 }
 
 async function getEmojis() {
@@ -1443,6 +1444,7 @@ class KitCommand extends Command {
             this.reset(true)
             return
         }
+        log('Moving kit')
         let emptySlots = getEmptySlotsInventory()
         let from_ = shulkerSlots[0]
         let to = emptySlots[0]+45
@@ -1614,7 +1616,7 @@ class AttackCommand extends Command {
         let verbs = ['pummeling', 'thrashing', 'mauling', 'battering', 'drubbing', 'lashing', 'bludgeoning', 'savaging', 'clobbering', 'annihilating']
         let randomVerb = verbs[Math.floor(Math.random() * verbs.length)]
         if(username == this.username) {
-            speak(`Wait, I'm ${randomVerb} you}`)
+            speak(`Wait, I'm ${randomVerb} you`)
         } else {
             speak(`Wait, I'm ${randomVerb} ${this.username}`)
         }
@@ -1665,11 +1667,15 @@ class AttackCommand extends Command {
             return
         }
         lock = this
+        log(`Attacking ${this.targetUser}`)
         let hasSword = await this.getSword()
+        log('Getting sword')
         if(!hasSword) {
+            log(`No sword, resetting`)
             this.reset()
             return
         }
+        log(`Tping to ${this.targetUser}`)
         tpaTo(this.targetUser)
         await waitForPlayer(this.targetUser)
         const defaultMove = new Movements(bot)
@@ -2283,7 +2289,7 @@ function registerBotListeners() {
     bot.once('spawn', async () => {
         bot.on('playerJoined', async (player) => {
             log(`${player.username} joined the game`, true)
-            updatePlayerTabImg()
+            updatePlayerTabImg().catch(()=>{})
             if(blacklist.includes(player.username))
                 return
             if(player.username == 'Synio' && Math.random() < 0.2)
@@ -2299,7 +2305,7 @@ function registerBotListeners() {
         })
         bot.on('playerLeft', async (player) => {
             log(`${player.username} left the game`, true)
-            updatePlayerTabImg()
+            updatePlayerTabImg().catch(()=>{})
             if(blacklist.includes(player.username))
                 return
             if(AfkCommand.afkPlayers.hasOwnProperty(player.username))

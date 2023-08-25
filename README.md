@@ -3,6 +3,7 @@
 ## With Docker (less wtfs involved)
 
 - Change env.js.example to your liking and rename it to env.js, then:
+- Get Docker for [Windows](https://docs.docker.com/desktop/install/windows-install/) or [Linux](https://docs.docker.com/desktop/install/linux-install/)
 
 ### Build
 ``` 
