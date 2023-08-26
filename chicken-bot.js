@@ -23,9 +23,9 @@ process.on('uncaughtException', (error) => {
   console.error(`An uncaught exception occurred at ${timestamp()}:`, error)
 })
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.log('Unhandled Rejection at:', promise, 'reason:', reason)
-})
+// process.on('unhandledRejection', (reason, promise) => {
+//   console.log('Unhandled Rejection at:', promise, 'reason:', reason)
+// })
 
 process.on('SIGTERM', () => {
     while(savingDatabase || savingBlacklist) {
@@ -378,7 +378,7 @@ function initDiscord() {
         let removedNewlines = content.replaceAll(/\n|\r/g, '').trim()
         let authorTag = `[${author}]`
         let messageBlocks = splitStringIntoBlocks(removedNewlines, 96 - authorTag.length)
-        for(const msg of messageBlocks) {
+        for(const msg of preventDegeneracy(messageBlocks)) {
             let line = `${authorTag}: \`${msg}`
             await getEmojis()            
             Object.entries(emojis).forEach(([emoji, convertedEmoji]) => {
@@ -1687,7 +1687,12 @@ class AttackCommand extends Command {
         if(username == this.username) {
             speak(`Wait, I'm ${randomVerb} you`)
         } else {
-            speak(`Wait, I'm ${randomVerb} ${this.username}`)
+            if(ticks - this.startTicks > FIVE_MINUTES) {
+                speak('Recovering after catastrophic failure, try again in a few seconds')
+                this.reset(true)
+            } else {
+                speak(`Wait, I'm ${randomVerb} ${this.username}`)
+            }
         }
     }
     
