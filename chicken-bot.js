@@ -28,10 +28,14 @@ process.on('uncaughtException', (error) => {
 // })
 
 process.on('SIGTERM', () => {
+    log('Got SIGTERM')
     while(savingDatabase || savingBlacklist) {
         log('Waiting for file writes to shut down')
+        saveDatabase()
+        saveBlacklist()
         sleeps(1)
     }
+    process.exit(0)
 })
 /* END OF ERROR HANDLING OR LACK THEREOF */
 
@@ -957,7 +961,7 @@ class KitCount extends Command {
         if(this.kitCountPlayer) {
             if(database.kitCount.hasOwnProperty(this.kitCountPlayer)) {
                 let kitsCount = database.kitCount[this.kitCountPlayer]
-                speak(`I have given ${kitCount} kits to ${this.kitCountPlayer}`)
+                speak(`I have given ${kitsCount} kits to ${this.kitCountPlayer}`)
             } else {
                 speak(`I have never given ${this.kitCountPlayer} a kit`)
             }
@@ -2543,7 +2547,7 @@ function registerBotListeners() {
         if(message == 'godsword')
             new GwCommand('_Nether_Chicken').execute()
         if(message == 'come')
-            tpaTo('/tpa _Nether_Chicken')
+            tpaTo('_Nether_Chicken')
         if(message == 'drop')
             dropAll()
         if(message == 'afk')
