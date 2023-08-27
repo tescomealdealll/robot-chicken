@@ -383,14 +383,14 @@ function initDiscord() {
         let removedNewlines = content.replaceAll(/\n|\r/g, '').trim()
         let authorTag = `[${author}]`
         let messageBlocks = splitStringIntoBlocks(removedNewlines, 96 - authorTag.length)
-        for(const msg of preventDegeneracy(messageBlocks)) {
+        for(const msg of messageBlocks) {
             let line = `${authorTag}: \`${msg}`
             await getEmojis()            
             Object.entries(emojis).forEach(([emoji, convertedEmoji]) => {
                 line = line.replaceAll(emoji, `:${convertedEmoji}:`)
             })
             log('Discord: ' + line)
-            speak(line)
+            speak(preventDegeneracy(line))
         }
         if(author == '_Nether_Chicken' && content.startsWith('&'))
             commandHandler.handle('_Nether_Chicken', content)
