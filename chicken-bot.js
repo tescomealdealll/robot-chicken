@@ -100,6 +100,7 @@ const KITS_2 = {
     'signs'           : BED_POS.offset( 4, 0, -14), // https://i.imgur.com/51ZzDuA.png
     'end'             : BED_POS.offset( 4, 0, -13), // https://i.imgur.com/SEB6z5T.png
     'mapart'          : BED_POS.offset( 4, 0, -12), // https://i.imgur.com/rV6yxTQ.png + https://i.imgur.com/gd3BBbI.png
+    'tesco'           : BED_POS.offset( 4, 0, -11), // https://i.imgur.com/3NpGE4M.png
 }
 const KITS_1 = {
     'tree'            : BED_POS.offset(-4, 0,  19), // https://i.imgur.com/nRUlj2e.png
@@ -1480,6 +1481,8 @@ class KitCommand extends Command {
 
     async getKitAtPosGround(kitPosGround, kitSide) {
         log('Getting kit')
+        while(!bot)
+            await sleeps(1)
         if(kitPosGround.distanceTo(bot.entity.position) > 300) {
             speak(`I'm too far away from the stash. This shouldn't happen. Try again in a few seconds`)
             this.reset(true)
@@ -2219,8 +2222,10 @@ async function massDepositEnderchest() {
         await bot.waitForTicks(10)
         await bot.simpleClick.leftMouse(to).catch(()=>{})
     }
+    await bot.waitForTicks(1)
     chest.close()
     critical = false
+    await bot.waitForTicks(1)
     log('Done depositing to enderchest')
 }
 
