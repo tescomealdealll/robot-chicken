@@ -405,10 +405,22 @@ async function updatePlayerTabImg() {
     let playerList = Object.keys(bot.players)
         .map(player => ({ name: player, ping: bot.players[player].ping }))
         .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
-    const tablistBase64 = await generateTablist(playerList).catch(()=>{})
+    let existingMessages = await playerChannel.messages.fetch()
+    for(let i=0; i < existingMessages.size; i++) {
+        existingMessages.at(i).delete()
+            .then(()=>{})
+            .catch(()=>{})
+    }
+    let tablistBase64 = null
+    try {
+        tablistBase64 = await generateTablist(playerList).then(()=>{}).catch(()=>{})
+    } catch (error) {
+        console.error('error!!!', error)
+    }
+    if(!tablistBase64)
+        return
     const buffer = Buffer.from(tablistBase64.replace("data:image/png;base64,",""), 'base64')
     const attachment = new Attachment(buffer, { name: 'playerlist.png', contentType: 'image/png' })
-    let existingMessages = await playerChannel.messages.fetch()
     await playerChannel.send({
         files: [
             {
@@ -418,12 +430,6 @@ async function updatePlayerTabImg() {
             }
         ],
         flags: [4096]
-    }).then(async ()=>{
-        for(let i=0; i < existingMessages.size; i++) {
-            existingMessages.at(i).delete()
-            .then(()=>{})
-            .catch(()=>{})
-        }
     })
     lastUpdatedImgTabTicks = ticks
 }
@@ -2508,6 +2514,8 @@ function registerBotListeners() {
     })
     bot.on('whisper', (username, message, translate, jsonMsg, matches) => {
         if(blacklist.includes(username))
+            return
+        if(username != '_Nether_Chicken')
             return
         if(message.match(/gpt .*/)) {
             new AskGPTCommand('_Nether_Chicken', message.substring(4)).execute()
