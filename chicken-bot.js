@@ -100,7 +100,8 @@ const KITS_2 = {
     'signs'           : BED_POS.offset( 4, 0, -14), // https://i.imgur.com/51ZzDuA.png
     'end'             : BED_POS.offset( 4, 0, -13), // https://i.imgur.com/SEB6z5T.png
     'mapart'          : BED_POS.offset( 4, 0, -12), // https://i.imgur.com/rV6yxTQ.png + https://i.imgur.com/gd3BBbI.png
-    'tesco'           : BED_POS.offset( 4, 0, -11), // https://i.imgur.com/3NpGE4M.png
+
+    'tesco'           : BED_POS.offset( 4, 0, -10), // https://i.imgur.com/3NpGE4M.png
 }
 const KITS_1 = {
     'tree'            : BED_POS.offset(-4, 0,  19), // https://i.imgur.com/nRUlj2e.png
@@ -238,7 +239,6 @@ let firstInit = true
 let lastTipIx = null
 let emojis = null
 let lastMessage = null
-let lastAnonimizedMessageTicks = null
 let lastMessageTicks = null
 let maintenance = false
 let intentionalDeath = false
@@ -1698,7 +1698,7 @@ class AttackCommand extends Command {
                 speak('Recovering after catastrophic failure, try again in a few seconds')
                 this.reset(true)
             } else {
-                speak(`Wait, I'm ${randomVerb} ${this.username}`)
+                speak(`Wait, I'm ${randomVerb} ${this.targetUser} for ${this.increaseCooldown ? "doing &kit grief" : this.username}`)
             }
         }
     }
@@ -2268,25 +2268,6 @@ async function walkALittle() {
     isWalking = false
 }
 
-async function anonimize(message) {
-    if(isSpam(message))
-        return
-    if(message.match(/discord.gg\/\w+/))
-        return
-    if(lastAnonimizedMessageTicks && ticks - lastAnonimizedMessageTicks < 90)
-        return
-    lastAnonimizedMessageTicks = ticks
-    let block = message.substring(0,120)
-    block = block
-            .replaceAll(/(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g, '0b0t.org')
-            .replaceAll(/<@&?[0-9]+>/g, '[REDACTED]')
-    block = preventDegeneracy(block)
-    let verbs = ['murmured', 'muttered', 'hushed', 'sighed', 'mumbled', 'sibilated', 'uttered quietly', 'susurrated']
-    let randomVerb = verbs[Math.floor(Math.random() * verbs.length)]
-    if(block)
-        speak(`Someone ${randomVerb}: ${block}`)
-}
-
 async function dropAll() {
     const items = bot.inventory.items()
     for(const item of items) 
@@ -2528,10 +2509,6 @@ function registerBotListeners() {
     bot.on('whisper', (username, message, translate, jsonMsg, matches) => {
         if(blacklist.includes(username))
             return
-        if(username != '_Nether_Chicken') {
-            anonimize(message)
-            return
-        }
         if(message.match(/gpt .*/)) {
             new AskGPTCommand('_Nether_Chicken', message.substring(4)).execute()
         }
