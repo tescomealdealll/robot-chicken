@@ -1202,19 +1202,120 @@ class TopDupesCommand extends Command {
     }
 }
 
-@registeredCommand("&nextnc", "", "shows how long to get your next nc color, and what it is")
+@registeredCommand("&nextnc", "[username]", "shows the requirements for the player's next name color")
 class NextNcCommand extends Command {
-    constructor(username) {
+    static jdString = null
+    // Color 	                    Joindate [d] 	Playtime [h] 
+    static ncTable = {
+        'gray'                      : [0,0],
+        'white'                     : [3,3],
+        'green'                     : [6,6],
+        'blue'                      : [12,12],
+        'dark purple'               : [23,24],
+        'gold'                      : [46,48],
+        'red'                       : [92,96],
+        'yellow'                    : [183,192],
+        'aqua (+bold)'              : [365,384],
+        'dark red (+bold)'          : [730,768],
+        'dark gray (bold + italic)' : [1460,1536],
+    }
+
+    constructor(username, targetUser) {
         super(username)
+        if(targetUser)
+            this.username = targetUser
     }
 
-    execute() {
+    async execute() {
+        if(NextNcCommand.jdString) {
+            speak(`Try again in a few seconds`)
+            return
+        }
+        if(!bot.players.hasOwnProperty(this.username)) {
+            speak(`Player ${this.username} is not online`)
+            return
+        }
+        await this.parseJdCommand()
+        NextNcCommand.jdString = null
+    }
+
+    getNextColor(jdDuration, ptDuration) {
+        let playerjdInDays = jdDuration.as('days')
+        let playerPtInHours = ptDuration.as('hours')
+        let rank = null
+        for (const [color, jdpt] of Object.entries(NextNcCommand.ncTable)) {
+            let [jd_days, pt_hours] = jdpt
+            if(playerjdInDays < jd_days || playerPtInHours < pt_hours)
+                break
+            rank = color
+        }
+        let indexOfCurrentColor = Object.keys(NextNcCommand.ncTable).indexOf(rank)
+        try {
+            return Object.keys(NextNcCommand.ncTable)[indexOfCurrentColor+1]
+        } catch(error) {
+            // scary dark gray namer wooo
+            return null
+        }
+    }
+
+    getDurationsForNextColor(jdDuration, ptDuration, nextColor) {
+        let [jdDaysNextColor, ptHoursNextColor] = NextNcCommand.ncTable[nextColor]
+        return [jdDaysNextColor - jdDuration.as('days'), ptHoursNextColor - ptDuration.as('hours')]
+    }
+
+    async parseJdCommand() {
         bot.chat('/jd ' + this.username)
+        while(NextNcCommand.jdString == null)
+            await sleep(100)
+        let match = NextNcCommand.jdString.match(/^(.*) joined the server (.*?) and played for (.*?)\.$/)
+        let jd = match[2]
+        let pt = match[3]
 
-    }
+        let jd_years = Number((jd.match(/(\d+) years?/)||[null,0])[1])
+        let jd_days = Number((jd.match(/(\d+) days?/)||[null,0])[1])
+        let jd_hours = Number((jd.match(/(\d+) hours?/)||[null,0])[1])
+        let jd_minutes = Number((jd.match(/(\d+) minutes?/)||[null,0])[1])
+        let jd_seconds = Number((jd.match(/(\d+) seconds?/)||[null,0])[1])
 
-    parseJdPt() {
+        let jdDuration = moment.duration({
+            seconds: jd_seconds,
+            minutes: jd_minutes,
+            hours: jd_hours,
+            days: jd_days,
+            years: jd_years
+        })
 
+        let pt_years = Number((pt.match(/(\d+) years?/)||[null,0])[1])
+        let pt_days = Number((pt.match(/(\d+) days?/)||[null,0])[1])
+        let pt_hours = Number((pt.match(/(\d+) hours?/)||[null,0])[1])
+        let pt_minutes = Number((pt.match(/(\d+) minutes?/)||[null,0])[1])
+        let pt_seconds = Number((pt.match(/(\d+) seconds?/)||[null,0])[1])
+
+        let ptDuration = moment.duration({
+            seconds: pt_seconds,
+            minutes: pt_minutes,
+            hours: pt_hours,
+            days: pt_days,
+            years: pt_years
+        })
+
+        let nextColor = this.getNextColor(jdDuration, ptDuration)
+        if(nextColor == null) {
+            speak(`${this.username} A DARK GRAY NAMER IS AMONG US`)
+            return
+        }
+        let [jdDaysNeeded, ptHoursNeeded] = this.getDurationsForNextColor(jdDuration, ptDuration, nextColor)
+        let reply = `${this.username} needs `
+        let needsJd = jdDaysNeeded > 0
+        let needsPt = ptHoursNeeded > 0
+        if(needsJd)
+            reply += `${Math.floor(jdDaysNeeded)} joindate days`
+        if(needsJd && needsPt)
+            reply += ' and '
+        if(needsPt)
+            reply += `${Math.ceil(ptHoursNeeded)} playtime hours`
+        reply += ` to get a ${nextColor} name according to the 0b0t website`
+        speak(reply)
     }
 }
 
@@ -1298,6 +1399,7 @@ class DupeCommand extends Command {
         let chestBlock = bot.blockAt(BED_POS.offset(3, 0, 0))
         critical = true
         let chest = await bot.openContainer(chestBlock)
+        chest.requiresConfirmation = false
         let emptySlots = getEmptySlots(chest)
         if(emptySlots.length > 0) {
             log('Chest is not full')
@@ -1523,6 +1625,7 @@ class KitCommand extends Command {
                 let chestBlock = bot.blockAt(kitPosChest)
                 critical = true
                 chest = await bot.openContainer(chestBlock)
+                chest.requiresConfirmation = false
                 log('Opened kit chest')
             } catch(error) {
                 log('Error opening kit chest')
@@ -1749,6 +1852,7 @@ class AttackCommand extends Command {
         try {
             critical = true
             chest = await bot.openContainer(swordChestBlock)
+            chest.requiresConfirmation = false
         } catch(error) {
             log(chest)
             log(error)
@@ -1958,6 +2062,7 @@ async function spreadBooks() {
     let chestBlock = bot.blockAt(BED_POS.offset(3, 0, 0))
     critical = true
     let chest = await bot.openContainer(chestBlock)
+    chest.requiresConfirmation = false
     while(!areBooksSpread(chest)) {
         let [slot, count] = getStackedBooksSlot(chest)
         if(slot == -1)
@@ -2112,6 +2217,7 @@ async function massWithdrawEnderchest() {
     try {
         critical = true
         chest = await bot.openContainer(chestBlock)
+        chest.requiresConfirmation = false
     } catch(error) {
         log(chest)
         log(error)
@@ -2175,6 +2281,7 @@ async function massWithdrawChest() {
         try {
             chestBlock = bot.blockAt(BED_POS.offset(3, 0, 0))
             chest = await bot.openContainer(chestBlock)
+            chest.requiresConfirmation = false
         } catch(error) {
             await sleeps(5)
             log('Killing to try and reload world')
@@ -2208,6 +2315,7 @@ async function massDepositChest() {
     let chestBlock = bot.blockAt(BED_POS.offset(3, 0, 0))
     critical = true
     let chest = await bot.openContainer(chestBlock)
+    chest.requiresConfirmation = false
     let emptySlots = getEmptySlots(chest)
     let shulkerSlots = getShulkerSlots()
     if(shulkerSlots.length == 0)
@@ -2231,6 +2339,7 @@ async function massDepositEnderchest() {
     let chestBlock = await bot.findBlock({ matching: [130], maxDistance: 5 })
     critical = true
     let chest = await bot.openContainer(chestBlock, new Vec3(0, -1, 0))
+    chest.requiresConfirmation = false
     let emptySlots = getEmptySlots(chest)
     let shulkerSlots = getShulkerSlots()
     if(shulkerSlots.length == 0) {
@@ -2451,6 +2560,9 @@ function registerBotListeners() {
         const serverCrashed = message.match(/^Exception Connecting:ReadTimeoutException : null$/)
         const serverCommandFailed = message.match(/^Please wait a bit before using this command again!$/)
         const tpaAccepted = message.match(/^Your request was accepted, teleporting to: .*$/)
+        const jdResponse = message.match(/^(.*) joined the server (.*?) and played for (.*?)\.$/)
+        if(jdResponse)
+            NextNcCommand.jdString = message
         if(tpaAccepted) {
             if(tpingTo)
                 tpingTo = null
@@ -2587,6 +2699,9 @@ function registerBotListeners() {
         }        
         if(message == 'map') {
             new MapCommand('_Nether_Chicken').execute()
+        }
+        if(message == 'nextnc') {
+            new NextNcCommand('_Nether_Chicken').execute()
         }
         if(message == 'ooo') {
             maintenance = !maintenance
