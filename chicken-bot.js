@@ -1202,6 +1202,22 @@ class TopDupesCommand extends Command {
     }
 }
 
+@registeredCommand("&nextnc", "", "shows how long to get your next nc color, and what it is")
+class NextNcCommand extends Command {
+    constructor(username) {
+        super(username)
+    }
+
+    execute() {
+        bot.chat('/jd ' + this.username)
+
+    }
+
+    parseJdPt() {
+
+    }
+}
+
 @registeredCommand("&reset", "", "moderator-exclusive command. Do not attempt. I'm watching you.")
 class ResetCommand extends Command {
     constructor(username) {
