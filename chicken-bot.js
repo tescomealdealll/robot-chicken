@@ -1281,8 +1281,13 @@ class NextNcCommand extends Command {
 
     async parseJdCommand() {
         bot.chat('/jd ' + this.username)
-        while(NextNcCommand.jdString == null)
-            await sleep(100)
+        let startTicks = ticks
+        while(NextNcCommand.jdString == null) {
+            await sleep(50)
+            if(ticks - startTicks > 40) {
+                return
+            }
+        }
         let match = NextNcCommand.jdString.match(/^(.*) joined the server (.*?) and played for (.*?)\.$/)
         let jd = match[2]
         let pt = match[3]
