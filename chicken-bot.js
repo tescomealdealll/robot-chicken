@@ -259,8 +259,19 @@ let savingBlacklist = false
 /* END OF GLOBAL VARS */
 
 /* START OF DISCORD FUNCTIONS */
+function makeBoldUsername(username) {
+    let normalChars = 'ABCDEFGHIJKLMNOPQRSTUVWYXZabcdefghijklmnopqrstuvwyxz1234567890_'
+    let boldChars = '𝐀𝐁𝐂𝐃𝐄𝐅𝐆𝐇𝐈𝐉𝐊𝐋𝐌𝐍𝐎𝐏𝐐𝐑𝐒𝐓𝐔𝐕𝐖𝐘𝐗𝐙𝐚𝐛𝐜𝐝𝐞𝐟𝐠𝐡𝐢𝐣𝐤𝐥𝐦𝐧𝐨𝐩𝐪𝐫𝐬𝐭𝐮𝐯𝐰𝐱𝐲𝐳𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗𝟎_' 
+    let result = ''
+    for(let i=0; i < username.length; i++)
+        result += boldChars[normalChars.indexOf(username[i])]
+    return result
+}
+
 async function updateIgnColorIfNeeded(rawUsername) {
+    log(rawUsername)
     let possibleColorCode = rawUsername.substring(0,2)
+    let isBold = rawUsername.includes('§l')
     let actualColor = HEX_CONVERSION_CODES[possibleColorCode] ?? null
     let username = rawUsername.replaceAll(/§./g, '')
     if(actualColor == null)
@@ -291,6 +302,11 @@ async function updateIgnColorIfNeeded(rawUsername) {
     if(!guildMember) {
         log('GuildMember not found')
         return
+    }
+    if(isBold) {
+        guildMember.setNickname(makeBoldUsername(username))
+    } else if(guildMember.nickname) {
+        guildMember.setNickname('')
     }
     if(!guildMember.roles) {
         log('GuildMember.roles not found')
