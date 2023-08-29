@@ -421,17 +421,21 @@ async function updatePlayerTabImg() {
         return
     const buffer = Buffer.from(tablistBase64.replace("data:image/png;base64,",""), 'base64')
     const attachment = new Attachment(buffer, { name: 'playerlist.png', contentType: 'image/png' })
-    await playerChannel.send({
-        files: [
-            {
-                contentType: 'image/png', 
-                name: 'playerlist.png', 
-                attachment: buffer
-            }
-        ],
-        flags: [4096]
-    })
-    lastUpdatedImgTabTicks = ticks
+    try {
+        await playerChannel.send({
+            files: [
+                {
+                    contentType: 'image/png', 
+                    name: 'playerlist.png', 
+                    attachment: buffer
+                }
+            ],
+            flags: [4096]
+        })
+        lastUpdatedImgTabTicks = ticks
+    } catch(error) {
+        log('Failed updating player tab img')
+    }
 }
 
 function forwardDiscordBridge(username, message, server) {
@@ -614,7 +618,7 @@ function log(message, chat) {
         return
     console.log(`[${timestamp()}][${chat ? 'CHAT' : 'SELF'}]: ${message}`)
     if(logsChannel && !chat)
-        if(message)
+        if(message && message.trim())
             logsChannel.send(message)
 }
 
