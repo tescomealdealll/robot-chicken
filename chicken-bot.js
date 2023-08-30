@@ -40,10 +40,10 @@ process.on('SIGTERM', () => {
 /* END OF ERROR HANDLING OR LACK THEREOF */
 
 /* START OF CONSTANTS */
+const START_TIME = moment()
+const BED_POS = new Vec3(...process.env.BED.match(/(\S+),(\S+),(\S+)/).slice(1).map(Number))
 const OUR_WEBSITE = 'https://robot-chicken.neocities.org'
 const DISPLAY_CHAT = true
-const BED_POS = new Vec3(...process.env.BED.match(/(\S+),(\S+),(\S+)/).slice(1).map(Number))
-const START_TIME = moment()
 const DATABASE = 'database.json'
 const BLACKLIST_FILE = 'blacklist.json'
 const ONE_MINUTE = 1 * 60 * 20
@@ -269,7 +269,6 @@ function makeBoldUsername(username) {
 }
 
 async function updateIgnColorIfNeeded(rawUsername) {
-    log(rawUsername)
     let possibleColorCode = rawUsername.substring(0,2)
     let isBold = rawUsername.includes('§l')
     let actualColor = HEX_CONVERSION_CODES[possibleColorCode] ?? null
@@ -303,10 +302,12 @@ async function updateIgnColorIfNeeded(rawUsername) {
         log('GuildMember not found')
         return
     }
-    if(isBold) {
-        guildMember.setNickname(makeBoldUsername(username))
-    } else if(guildMember.nickname) {
-        guildMember.setNickname('')
+    if(username != '_Nether_Chicken') {
+        if(isBold ) {
+            guildMember.setNickname(makeBoldUsername(username))
+        } else if(guildMember.nickname) {
+            guildMember.setNickname('')
+        }
     }
     if(!guildMember.roles) {
         log('GuildMember.roles not found')
@@ -630,11 +631,15 @@ function timestamp() {
 }
 
 function log(message, chat) {
+    if(typeof message !== 'string') {
+        log('@_Nether_Chicken, I just tried logging a message of type ' + (typeof message))
+        return
+    }
     if(!DISPLAY_CHAT && chat)
         return
     console.log(`[${timestamp()}][${chat ? 'CHAT' : 'SELF'}]: ${message}`)
     if(logsChannel && !chat)
-        if(message && message.trim())
+        if(message)
             logsChannel.send(message)
 }
 
@@ -1610,11 +1615,6 @@ class KitCommand extends Command {
         } else {
             let side = kitMatches1.length > 0 ? 1 : 2
             this.kitId = side == 1 ? kitMatches1[0] : kitMatches2[0]
-            if(EXCLUSIVE_KITS.hasOwnProperty(this.kitId) && !VIP.includes(this.username)) {
-                speak('< Unknown kit. Check the IDs under the images here: `' + OUR_WEBSITE)
-                this.kitId = null
-                return null
-            }
             return side
         }
     }
@@ -1694,6 +1694,10 @@ class KitCommand extends Command {
         let kitSide = this.parseKit()
         if(!this.kitId)
             return
+        if(EXCLUSIVE_KITS.includes(this.kitId) && !VIP.includes(this.username)) {
+            speak('< Unknown kit. Check the IDs under the images here: `' + OUR_WEBSITE)
+            return
+        }
         if(KitCommand.cooldown.hasOwnProperty(this.username)) {
             let duration = moment.duration(moment().diff(KitCommand.cooldown[this.username])).asMinutes()
             if(duration < 5 && duration > 0) {
