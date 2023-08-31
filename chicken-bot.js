@@ -102,6 +102,7 @@ const KITS_2 = {
     'mapart'          : BED_POS.offset( 4, 0, -12), // https://i.imgur.com/rV6yxTQ.png + https://i.imgur.com/gd3BBbI.png
 
     'tesco'           : BED_POS.offset( 4, 0, -10), // https://i.imgur.com/3NpGE4M.png
+    'eggs'            : BED_POS.offset( 4, 0, -9),  // https://i.imgur.com/JV1cr9Z.png
 }
 const KITS_1 = {
     'tree'            : BED_POS.offset(-4, 0,  19), // https://i.imgur.com/nRUlj2e.png
@@ -426,7 +427,8 @@ async function updatePlayerTabImg() {
 
         tablistBase64 = await bot.tablist.renderToBase64()
     } catch (error) {
-        log('Failed updating player tab img')
+        log('Failed updating player tab img:')
+        log(error)
     }
     if(!tablistBase64)
         return
