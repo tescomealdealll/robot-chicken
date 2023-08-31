@@ -1,13 +1,5 @@
 FROM node:20
 
-WORKDIR /usr/src
-RUN git clone https://github.com/nether-chicken/mineflayer-playerlist/
-
-WORKDIR /usr/src/mineflayer-playerlist
-RUN npm install -g typescript
-RUN npm install 
-RUN tsc
-
 WORKDIR /usr/src/chicken-bot
 VOLUME ["/usr/src/chicken-bot"]
 COPY .babelrc .

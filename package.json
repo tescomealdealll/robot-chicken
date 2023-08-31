@@ -14,7 +14,7 @@
     "mineflayer-antiafk": "^1.1.1",
     "mineflayer-auto-eat": "^3.3.6",
     "mineflayer-pathfinder": "^2.4.4",
-    "mineflayer-playerlist": "file:../mineflayer-playerlist",
+    "mineflayer-tablist": "github:nether-chicken/mineflayer-tablist",
     "moment": "^2.29.4"
   },
   "devDependencies": {

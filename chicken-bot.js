@@ -2,7 +2,7 @@
 require('./env.js') // load environment variables
 const Mineflayer = require('mineflayer')
 const { pathfinder, Movements, goals: { GoalNear } } = require('mineflayer-pathfinder')
-const { generateTablist } = require('mineflayer-playerlist')
+const tablist = require('mineflayer-tablist');
 
 const repl = require('repl')
 const fs = require('fs').promises
@@ -67,7 +67,6 @@ const PROMOTION_MESSAGES = [
     ',Drop by the discord bridge! https://discord.gg/fegUKHTwQd',
     ",Try &kit today! You can see the list here: `" + OUR_WEBSITE,
     ",Need to send someone items? Just &mail them!",
-    ",I can anonymize messages, just /whisper it to me!",
 ]
 const COMMAND_PREFIXES = ['!', '&', '$', '?', '*', '%', '>', ':']
 const WEBHOOK = new WebhookClient({ url: `http://discord.com/api/webhooks/1131047779817500793/${process.env.WEBHOOK_ID}` }) // thanks Cody4687
@@ -80,7 +79,8 @@ const VIP = [ // cooldown removed, more kits!
     '_Nether_Chicken', 
     'PayTheParrot', 
     'lilkitkat1',
-    'Primooctopus33'
+    'Primooctopus33',
+    'vaporii'
     ]
 const VVIP = [ // reset priviledges!!
     'antonymph', 
@@ -92,7 +92,7 @@ const VVVIP = [ // tp and whisper command priviledge!!!
 ] 
 
 const DOUBLE_KITS = ['mapart']
-const EXCLUSIVE_KITS = ['lava', 'obsidian', 'tnt', 'grief', 'illegal']
+const EXCLUSIVE_KITS = ['lava', 'obsidian', 'tnt', 'grief']
 const KITS_2 = {
     'kit'             : BED_POS.offset( 4, 0, -17), // https://i.imgur.com/X7IwX5i.png
     'sand'            : BED_POS.offset( 4, 0, -16), // https://i.imgur.com/z0HkbVD.png
@@ -415,24 +415,18 @@ function initDiscord() {
 }
 
 async function updatePlayerTabImg() {
-    if(!bot || !bot.players || !playerChannel)
+    if(!bot?.players)
         return
-    if(ticks - lastUpdatedImgTabTicks < 400)
-        return
-    let playerList = Object.keys(bot.players)
-        .map(player => ({ name: player, ping: bot.players[player].ping }))
-        .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
+    let playerPingList = Object.keys(bot.players)
+        .sort((p1, p2) => p1.localeCompare(p2, undefined, { sensitivity: 'base' }))
+        .map(player => `${player}:${bot.players[player].ping}`)
     let existingMessages = await playerChannel.messages.fetch()
-    for(let i=0; i < existingMessages.size; i++) {
-        existingMessages.at(i).delete()
-            .then(()=>{})
-            .catch(()=>{})
-    }
     let tablistBase64 = null
     try {
-        tablistBase64 = await generateTablist(playerList).then(()=>{}).catch(()=>{})
+
+        tablistBase64 = await bot.tablist.renderToBase64()
     } catch (error) {
-        console.error('error!!!', error)
+        log('Failed updating player tab img')
     }
     if(!tablistBase64)
         return
@@ -448,6 +442,13 @@ async function updatePlayerTabImg() {
                 }
             ],
             flags: [4096]
+        }).then(() => {
+            for(let i=0; i < existingMessages.size; i++) {
+                existingMessages.at(i).delete()
+                .then(()=>{})
+            .catch(()=>{})
+            }
+
         })
         lastUpdatedImgTabTicks = ticks
     } catch(error) {
@@ -631,10 +632,8 @@ function timestamp() {
 }
 
 function log(message, chat) {
-    if(typeof message !== 'string') {
-        log('@_Nether_Chicken, I just tried logging a message of type ' + (typeof message))
-        return
-    }
+    if(typeof message !== 'string')
+        message = message.toString()
     if(!DISPLAY_CHAT && chat)
         return
     console.log(`[${timestamp()}][${chat ? 'CHAT' : 'SELF'}]: ${message}`)
@@ -1425,7 +1424,6 @@ class DupeCommand extends Command {
         let chestBlock = bot.blockAt(BED_POS.offset(3, 0, 0))
         critical = true
         let chest = await bot.openContainer(chestBlock)
-        chest.requiresConfirmation = false
         let emptySlots = getEmptySlots(chest)
         if(emptySlots.length > 0) {
             log('Chest is not full')
@@ -1646,7 +1644,6 @@ class KitCommand extends Command {
                 let chestBlock = bot.blockAt(kitPosChest)
                 critical = true
                 chest = await bot.openContainer(chestBlock)
-                chest.requiresConfirmation = false
                 log('Opened kit chest')
             } catch(error) {
                 log('Error opening kit chest')
@@ -1838,7 +1835,7 @@ class GodPotCommand extends Command { // WIP
 class AttackCommand extends Command {
     constructor(username, targetUser) {
         super(username)
-        this.increaseCooldown = targetUser.includes(',')
+        this.increaseCooldown = targetUser ? targetUser.includes(',') : false
         this.targetUser = this.increaseCooldown ? targetUser.replace(',', '') : targetUser
     }
 
@@ -1877,7 +1874,6 @@ class AttackCommand extends Command {
         try {
             critical = true
             chest = await bot.openContainer(swordChestBlock)
-            chest.requiresConfirmation = false
         } catch(error) {
             log(chest)
             log(error)
@@ -2032,6 +2028,7 @@ function createBot() {
             hideErrors: true
         })
         bot.loadPlugin(pathfinder)
+        bot.loadPlugin(tablist)
         log('Logged in')
         registerBotListeners()
     } catch(error) {
@@ -2087,7 +2084,6 @@ async function spreadBooks() {
     let chestBlock = bot.blockAt(BED_POS.offset(3, 0, 0))
     critical = true
     let chest = await bot.openContainer(chestBlock)
-    chest.requiresConfirmation = false
     while(!areBooksSpread(chest)) {
         let [slot, count] = getStackedBooksSlot(chest)
         if(slot == -1)
@@ -2242,7 +2238,6 @@ async function massWithdrawEnderchest() {
     try {
         critical = true
         chest = await bot.openContainer(chestBlock)
-        chest.requiresConfirmation = false
     } catch(error) {
         log(chest)
         log(error)
@@ -2306,7 +2301,6 @@ async function massWithdrawChest() {
         try {
             chestBlock = bot.blockAt(BED_POS.offset(3, 0, 0))
             chest = await bot.openContainer(chestBlock)
-            chest.requiresConfirmation = false
         } catch(error) {
             await sleeps(5)
             log('Killing to try and reload world')
@@ -2340,7 +2334,6 @@ async function massDepositChest() {
     let chestBlock = bot.blockAt(BED_POS.offset(3, 0, 0))
     critical = true
     let chest = await bot.openContainer(chestBlock)
-    chest.requiresConfirmation = false
     let emptySlots = getEmptySlots(chest)
     let shulkerSlots = getShulkerSlots()
     if(shulkerSlots.length == 0)
@@ -2364,7 +2357,6 @@ async function massDepositEnderchest() {
     let chestBlock = await bot.findBlock({ matching: [130], maxDistance: 5 })
     critical = true
     let chest = await bot.openContainer(chestBlock, new Vec3(0, -1, 0))
-    chest.requiresConfirmation = false
     let emptySlots = getEmptySlots(chest)
     let shulkerSlots = getShulkerSlots()
     if(shulkerSlots.length == 0) {
@@ -2506,7 +2498,7 @@ function registerBotListeners() {
     bot.once('spawn', async () => {
         bot.on('playerJoined', async (player) => {
             log(`${player.username} joined the game`, true)
-            await updatePlayerTabImg()
+            updatePlayerTabImg()
             if(blacklist.includes(player.username))
                 return
             if(player.username == 'Synio' && Math.random() < 0.2)
@@ -2520,9 +2512,9 @@ function registerBotListeners() {
                 speak('blue jay')
             }
         })
-        bot.on('playerLeft', async (player) => {
+        bot.on('playerLeft', (player) => {
             log(`${player.username} left the game`, true)
-            await updatePlayerTabImg()
+            updatePlayerTabImg()
             if(blacklist.includes(player.username))
                 return
             if(AfkCommand.afkPlayers.hasOwnProperty(player.username))
