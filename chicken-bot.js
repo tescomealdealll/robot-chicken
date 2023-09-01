@@ -103,6 +103,7 @@ const KITS_2 = {
 
     'tesco'           : BED_POS.offset( 4, 0, -10), // https://i.imgur.com/3NpGE4M.png
     'eggs'            : BED_POS.offset( 4, 0, -9),  // https://i.imgur.com/JV1cr9Z.png
+    'lapis'           : BED_POS.offset( 4, 0, -8),  // https://i.imgur.com/Ehtas77.png
 }
 const KITS_1 = {
     'tree'            : BED_POS.offset(-4, 0,  19), // https://i.imgur.com/nRUlj2e.png
