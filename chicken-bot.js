@@ -2631,6 +2631,10 @@ function registerBotListeners() {
                 speak(`< ${MailCommand.mailingFor} forgot to accept my tp request to send some mail to ${MailCommand.mailingTo}`)
             if(MailCommand.mailingTo == fromWho)
                 speak(`< ${MailCommand.mailingTo} forgot to accept my tp request to receive some mail from ${MailCommand.mailingFor}`)
+            if(KitCommand.kitFor) {
+                if(!VIP.includes(fromWho))
+                    KitCommand.cooldown[fromWho] = moment().add(1, 'hour')
+            }
             if(lock)
                 lock.reset(true)
             tpingTo = null
